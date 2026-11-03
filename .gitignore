@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Generated/exported scratch files
+tmp-*.py
+__pycache__/
+*.pyc
+
+# Local verification output
+.verify*/
+.pnpm-store/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+*.log

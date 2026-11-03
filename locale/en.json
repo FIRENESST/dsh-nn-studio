@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Neural Network Studio",
+    "description": "Design, validate, and export neural networks on a visual node graph, with shape inference, parameter statistics, PyTorch/Keras code, and training scripts."
+  }
+}
