@@ -12,6 +12,7 @@ window.__ModuleLoader__.load({
     const NS = 'nnStudio'
     const PANEL_ID = 'nn-studio'
     const STORE_KEY = 'dsh.nn-studio.graph.v1'
+    const LOCALE_KEY = 'dsh.nn-studio.locale.v1'
     const MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace'
     const NODE_W = 184
     const NODE_H = 78
@@ -34,6 +35,7 @@ window.__ModuleLoader__.load({
       'header.export': '导出',
       'header.exportPy': '导出 Python',
       'header.exportJson': '导出 JSON',
+      'header.language': '切换界面语言',
       'header.fit': '适应画布',
       'header.zoomIn': '放大',
       'header.zoomOut': '缩小',
@@ -276,6 +278,7 @@ window.__ModuleLoader__.load({
       'header.export': 'Export',
       'header.exportPy': 'Export Python',
       'header.exportJson': 'Export JSON',
+      'header.language': 'Switch interface language',
       'header.fit': 'Fit view',
       'header.zoomIn': 'Zoom in',
       'header.zoomOut': 'Zoom out',
@@ -507,10 +510,30 @@ window.__ModuleLoader__.load({
       'warn.softmaxMismatch': 'The output ends with Softmax; the training script handles the loss accordingly',
     }
 
-    let I18N = { t: (key) => EN[key] || key }
+    let I18N = { t: (key) => ZH[key] || EN[key] || key }
+    let UI_LOCALE = 'zh'
 
     /**
-     * Resolve a message key, interpolating named parameters.
+     * Persist the workbench interface language.
+     * @param next - `zh` or `en`.
+     * @returns nothing.
+     */
+    function setInterfaceLocale(next) {
+      UI_LOCALE = next === 'en' ? 'en' : 'zh'
+      try {
+        if (typeof localStorage !== 'undefined') localStorage.setItem(LOCALE_KEY, UI_LOCALE)
+      } catch (_persistFailed) {
+        /* the preference is optional */
+      }
+    }
+
+    /**
+     * Resolve a message key in the selected interface language.
+     *
+     * The workbench ships a Chinese-first interface with an explicit `中/EN`
+     * switch instead of inheriting the host locale, so a Chinese user is not
+     * silently moved to the English dictionary when the host is English.
+     *
      * @param ctx - plugin context that owns the locale service.
      * @returns a translate function.
      */
@@ -528,25 +551,12 @@ window.__ModuleLoader__.load({
           /* a reload of the same package keeps the previous dictionary */
         }
       }
-      let bound = null
-      if (locale && typeof locale.bind === 'function') {
-        try {
-          bound = locale.bind(NS)
-        } catch (_unbound) {
-          bound = null
-        }
-      }
       const translate = (key, params) => {
-        let text = key
-        if (bound) {
-          try {
-            const value = bound(key)
-            if (typeof value === 'string' && value !== '' && value !== key) text = value
-          } catch (_translationFailed) {
-            /* fall through to the bundled dictionary */
-          }
-        }
-        if (text === key) text = EN[key] || ZH[key] || key
+        const primary = UI_LOCALE === 'en' ? EN : ZH
+        const secondary = UI_LOCALE === 'en' ? ZH : EN
+        let text = primary[key]
+        if (text === undefined) text = secondary[key]
+        if (text === undefined) text = key
         if (params) {
           for (const name of Object.keys(params)) {
             let value = params[name]
@@ -2926,6 +2936,13 @@ window.__ModuleLoader__.load({
           return h('svg', common, h('path', { d: 'M12 3v12m-4-4 4 4 4-4M4 20h16' }))
         case 'spark':
           return h('svg', common, h('path', { d: 'M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8' }))
+        case 'globe':
+          return h(
+            'svg',
+            common,
+            h('circle', { cx: 12, cy: 12, r: 9 }),
+            h('path', { d: 'M3 12h18M12 3c2.4 2.4 3.6 5.4 3.6 9s-1.2 6.6-3.6 9c-2.4-2.4-3.6-5.4-3.6-9S9.6 5.4 12 3z' }),
+          )
         default:
           return h('svg', common, h('circle', { cx: 12, cy: 12, r: 8 }))
       }
@@ -4151,6 +4168,7 @@ window.__ModuleLoader__.load({
       const [framework, setFramework] = useState('pytorch')
       const [codeSection, setCodeSection] = useState('model')
       const [panning, setPanning] = useState(false)
+      const [uiLocale, setUiLocale] = useState(UI_LOCALE)
 
       const canvasRef = useRef(null)
       const fileRef = useRef(null)
@@ -4169,6 +4187,12 @@ window.__ModuleLoader__.load({
         setToast({ text, tone: tone || 'info', id: Date.now() })
         if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
         toastTimerRef.current = setTimeout(() => setToast(null), 3000)
+      }, [])
+
+      const toggleLocale = useCallback(() => {
+        const next = UI_LOCALE === 'zh' ? 'en' : 'zh'
+        setInterfaceLocale(next)
+        setUiLocale(next)
       }, [])
       useEffect(() => {
         return () => {
@@ -4873,6 +4897,13 @@ window.__ModuleLoader__.load({
             }),
             h(Button, { icon: 'export', label: t('header.export'), title: t('header.exportJson'), onClick: exportJson }),
             h(Button, {
+              icon: 'globe',
+              label: uiLocale === 'zh' ? 'EN' : '中',
+              variant: 'ghost',
+              title: t('header.language'),
+              onClick: toggleLocale,
+            }),
+            h(Button, {
               icon: 'panelLeft',
               variant: 'icon',
               title: t('header.palette'),
@@ -5103,6 +5134,12 @@ window.__ModuleLoader__.load({
     return {
       inject: ['slots'],
       apply(ctx) {
+        try {
+          const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(LOCALE_KEY) : null
+          if (saved === 'en' || saved === 'zh') UI_LOCALE = saved
+        } catch (_restoreFailed) {
+          UI_LOCALE = 'zh'
+        }
         I18N = { t: makeTranslator(ctx) }
         ctx.slots.inject('sidebar.panellist', () =>
           ctx.slots.register(

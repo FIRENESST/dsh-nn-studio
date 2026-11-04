@@ -13,7 +13,7 @@ A visual neural-network workbench that lives in the DeepSeek Harness sidebar. Dr
 - **Code export** — PyTorch and Keras model code, training script, and requirements. Loss handling covers logits, softmax tails, and reconstruction (autoencoder) graphs; Keras output uses channels-last so it runs on CPU.
 - **Templates** — MLP, CNN, residual block, LSTM text classifier, autoencoder, and a blank canvas.
 - **Persistence** — automatic local save, JSON import/export, and copy/download for generated code.
-- **Bilingual UI** — Chinese and English, using the host theme tokens.
+- **Chinese-first UI** — Chinese by default, with an in-app `中/EN` switch in the toolbar; both locales use the host theme tokens.
 
 ## Layer types
 
@@ -42,7 +42,7 @@ The Host half (`index.js`) is intentionally empty: the workbench runs entirely i
 - Click a layer to edit it in the **Node** tab. Invalid layers turn red with an explanation in **Checks**.
 - Add layers from the library; when a selected layer has no outgoing connection, the new layer is connected automatically.
 - Use **Templates** for a ready-made network, then **Model** to adjust training settings and **Code** to export.
-- Press `Delete` to remove the selection, `Ctrl+Z` / `Ctrl+Shift+Z` for undo/redo, `Ctrl+D` to duplicate, and `F` to fit the graph.
+- Press `Delete` to remove the selection, `Ctrl+Z` / `Ctrl+Shift+Z` for undo/redo, `Ctrl+D` to duplicate, and `F` to fit the graph. The `EN/中` toolbar button switches the interface language and remembers the choice.
 
 ## Generated code
 
@@ -84,7 +84,7 @@ Pixel-level browser verification is environment-dependent; open the panel and ch
 - 模型面板：层数、参数量、模型大小、逐层明细、训练配置；
 - 代码面板：PyTorch / Keras 模型、训练脚本、依赖清单，可复制或下载；
 - 模板：MLP、CNN、残差网络、LSTM 文本分类、自编码器；
-- 自动保存、JSON 导入导出、中英双语、跟随宿主主题。
+- 自动保存、JSON 导入导出、默认中文界面（工具栏可切换 `中/EN`）、跟随宿主主题。
 
 安装：把本仓库复制到 Harness 可访问的工作区，让 Agent 通过 Plugin Manager 安装该 bundle。侧边栏出现「神经网络工作室」图标后点击即可使用。
 
