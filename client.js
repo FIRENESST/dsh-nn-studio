@@ -64,9 +64,12 @@ window.__ModuleLoader__.load({
       'node.lstm': 'LSTM',
       'node.add': '相加',
       'node.concat': '拼接',
+      'node.disabled': '已禁用',
+      'node.disable': '禁用该层',
+      'node.enable': '启用该层',
       'canvas.empty': '从节点库添加第一层',
       'canvas.emptyHint': '或者从一个模板开始，几秒得到一个可运行的网络。',
-      'canvas.hint': '拖动空白处平移 · 滚轮缩放 · 从右侧端口拖到左侧端口连线 · Delete 删除',
+      'canvas.hint': '拖动空白处平移 · 滚轮缩放 · 端口拖拽连线 · Ctrl+拖动框选 · Delete/Backspace 删除',
       'canvas.loadTemplate': '浏览模板',
       'canvas.connecting': '松开以连接到目标层的左侧端口',
       'shape.pending': '形状待定',
@@ -92,11 +95,17 @@ window.__ModuleLoader__.load({
       'inspector.delete': '删除',
       'inspector.center': '居中',
       'inspector.disconnect': '断开输入',
+      'inspector.disabledNote': '该层已禁用：检查与代码导出都会跳过它，输入形状直接传给下游。',
+      'inspector.multiTitle': '已选择 {count} 个层',
+      'inspector.multiBody': '可同时删除，或临时禁用这些层。',
+      'inspector.disableSelected': '禁用所选',
+      'inspector.enableSelected': '启用所选',
       'inspector.deleteEdge': '删除连线',
       'inspector.shortcuts': '快捷键',
       'sc.undo': 'Ctrl+Z 撤销',
       'sc.redo': 'Ctrl+Shift+Z 重做',
-      'sc.delete': 'Delete 删除所选',
+      'sc.delete': 'Delete/Backspace 删除所选',
+      'sc.marquee': 'Ctrl+拖动 框选节点',
       'sc.duplicate': 'Ctrl+D 复制节点',
       'sc.fit': 'F 适应画布',
       'checks.okTitle': '检查通过',
@@ -223,6 +232,11 @@ window.__ModuleLoader__.load({
       'toast.cleared': '已清空画布',
       'toast.nodeAdded': '已添加 {name}',
       'toast.nodeDeleted': '已删除层',
+      'toast.nodesDeleted': '已删除 {count} 个层',
+      'toast.nodeDisabled': '已禁用该层',
+      'toast.nodeEnabled': '已启用该层',
+      'toast.nodesDisabled': '已禁用 {count} 个层',
+      'toast.nodesEnabled': '已启用 {count} 个层',
       'toast.edgeDeleted': '已删除连线',
       'toast.restored': '已恢复上次编辑',
       'toast.invalidGraph': '文件不是有效的神经网络网络',
@@ -234,6 +248,7 @@ window.__ModuleLoader__.load({
       'err.shapeRank': '输入形状需要 1–4 维',
       'err.noInput': '网络至少需要一个输入层',
       'err.noOutput': '网络至少需要一个输出层',
+      'err.unresolvedOutput': '输出形状无法推导，请检查被禁用或断开的层',
       'err.multiInput': '当前版本只支持一个输入层',
       'err.multiOutput': '当前版本只支持一个输出层',
       'err.missingInput': '该层没有连接输入',
@@ -307,9 +322,12 @@ window.__ModuleLoader__.load({
       'node.lstm': 'LSTM',
       'node.add': 'Add',
       'node.concat': 'Concat',
+      'node.disabled': 'Disabled',
+      'node.disable': 'Disable layer',
+      'node.enable': 'Enable layer',
       'canvas.empty': 'Add your first layer',
       'canvas.emptyHint': 'Or start from a template and get a runnable network in seconds.',
-      'canvas.hint': 'Drag empty space to pan · Wheel to zoom · Drag output port to input port · Delete to remove',
+      'canvas.hint': 'Drag empty space to pan · Wheel to zoom · Drag ports to connect · Ctrl+drag to marquee-select · Delete/Backspace to remove',
       'canvas.loadTemplate': 'Browse templates',
       'canvas.connecting': 'Release on a target layer input port',
       'shape.pending': 'shape pending',
@@ -335,11 +353,17 @@ window.__ModuleLoader__.load({
       'inspector.delete': 'Delete',
       'inspector.center': 'Center',
       'inspector.disconnect': 'Disconnect inputs',
+      'inspector.disabledNote': 'This layer is disabled: checks and export skip it, and its input shape passes through.',
+      'inspector.multiTitle': '{count} layers selected',
+      'inspector.multiBody': 'Delete them together, or temporarily disable them.',
+      'inspector.disableSelected': 'Disable selected',
+      'inspector.enableSelected': 'Enable selected',
       'inspector.deleteEdge': 'Remove edge',
       'inspector.shortcuts': 'Shortcuts',
       'sc.undo': 'Ctrl+Z undo',
       'sc.redo': 'Ctrl+Shift+Z redo',
-      'sc.delete': 'Delete removes selection',
+      'sc.delete': 'Delete/Backspace removes selection',
+      'sc.marquee': 'Ctrl+drag marquee select',
       'sc.duplicate': 'Ctrl+D duplicates a node',
       'sc.fit': 'F fits the view',
       'checks.okTitle': 'All checks passed',
@@ -466,6 +490,11 @@ window.__ModuleLoader__.load({
       'toast.cleared': 'Canvas cleared',
       'toast.nodeAdded': 'Added {name}',
       'toast.nodeDeleted': 'Layer removed',
+      'toast.nodesDeleted': 'Removed {count} layers',
+      'toast.nodeDisabled': 'Layer disabled',
+      'toast.nodeEnabled': 'Layer enabled',
+      'toast.nodesDisabled': 'Disabled {count} layers',
+      'toast.nodesEnabled': 'Enabled {count} layers',
       'toast.edgeDeleted': 'Edge removed',
       'toast.restored': 'Restored your last edit',
       'toast.invalidGraph': 'That file is not a valid network',
@@ -477,6 +506,7 @@ window.__ModuleLoader__.load({
       'err.shapeRank': 'The input shape needs 1–4 dimensions',
       'err.noInput': 'The network needs at least one Input layer',
       'err.noOutput': 'The network needs at least one Output layer',
+      'err.unresolvedOutput': 'The output shape cannot be resolved; check disabled or disconnected layers',
       'err.multiInput': 'Only one Input layer is supported in this version',
       'err.multiOutput': 'Only one Output layer is supported in this version',
       'err.missingInput': 'This layer has no input connection',
@@ -845,6 +875,7 @@ window.__ModuleLoader__.load({
         y: finite(y, 0),
         title: String(extra.title || I18N.t('node.' + type)),
         params: defaultParams(type, extra.params),
+        disabled: false,
       }
     }
 
@@ -891,6 +922,7 @@ window.__ModuleLoader__.load({
           y: finite(entry.y, 0),
           title: String(entry.title || I18N.t('node.' + type)).replace(/[\r\n\t]+/g, ' ').slice(0, 80),
           params,
+          disabled: Boolean(entry.disabled) && type !== 'input' && type !== 'output',
         })
       }
       if (!nodes.length && raw.nodes.length) return null
@@ -929,10 +961,101 @@ window.__ModuleLoader__.load({
     function cloneGraph(graph) {
       return {
         name: graph.name,
-        nodes: graph.nodes.map((node) => ({ id: node.id, type: node.type, x: node.x, y: node.y, title: node.title, params: Object.assign({}, node.params) })),
+        nodes: graph.nodes.map((node) => ({ id: node.id, type: node.type, x: node.x, y: node.y, title: node.title, params: Object.assign({}, node.params), disabled: node.disabled === true })),
         edges: graph.edges.map((edge) => ({ id: edge.id, from: edge.from, to: edge.to })),
         training: Object.assign({}, graph.training),
       }
+    }
+
+    /**
+     * Report whether a layer can be bypassed by the disable switch.
+     * Input and Output nodes define the model boundary and stay active.
+     * @param node - graph node.
+     * @returns true when validation and export should skip the layer.
+     */
+    function isLayerDisabled(node) {
+      return Boolean(node && node.disabled) && node.type !== 'input' && node.type !== 'output'
+    }
+
+    /**
+     * Read the selected node ids from a selection snapshot.
+     * @param selection - studio selection or null.
+     * @returns an array of node ids.
+     */
+    function selectionNodes(selection) {
+      return selection && Array.isArray(selection.nodes) ? selection.nodes : []
+    }
+
+    /**
+     * Read the selected edge id from a selection snapshot.
+     * @param selection - studio selection or null.
+     * @returns the edge id or null.
+     */
+    function selectionEdgeId(selection) {
+      return selection && selection.edge ? selection.edge : null
+    }
+
+    /**
+     * Report whether one node is inside the current selection.
+     * @param selection - studio selection or null.
+     * @param id - node id.
+     * @returns true when selected.
+     */
+    function nodeIsSelected(selection, id) {
+      return Boolean(selection && Array.isArray(selection.nodes) && selection.nodes.includes(id))
+    }
+
+    /**
+     * Collect node ids whose cards intersect a world-space rectangle.
+     * @param nodes - graph nodes.
+     * @param rect - `{ left, right, top, bottom }` in world coordinates.
+     * @returns matching node ids in graph order.
+     */
+    function nodesInRect(nodes, rect) {
+      return nodes
+        .filter(
+          (node) =>
+            node.x < rect.right &&
+            node.x + NODE_W > rect.left &&
+            node.y < rect.bottom &&
+            node.y + NODE_H > rect.top,
+        )
+        .map((node) => node.id)
+    }
+
+    /**
+     * Remove every selected node and the selected edge from a graph.
+     * @param graph - current graph.
+     * @param selection - studio selection or null.
+     * @returns a new graph.
+     */
+    function removeSelected(graph, selection) {
+      const ids = new Set(selectionNodes(selection))
+      const edgeId = selectionEdgeId(selection)
+      return Object.assign({}, graph, {
+        nodes: graph.nodes.filter((node) => !ids.has(node.id)),
+        edges: graph.edges.filter(
+          (edge) => edge.id !== edgeId && !ids.has(edge.from) && !ids.has(edge.to),
+        ),
+      })
+    }
+
+    /**
+     * Toggle the disabled flag on a set of layers.
+     * @param graph - current graph.
+     * @param ids - node ids to update.
+     * @param disabled - next flag.
+     * @returns a new graph.
+     */
+    function setNodesDisabled(graph, ids, disabled) {
+      const targets = new Set(ids)
+      return Object.assign({}, graph, {
+        nodes: graph.nodes.map((node) =>
+          targets.has(node.id) && node.type !== 'input' && node.type !== 'output'
+            ? Object.assign({}, node, { disabled: Boolean(disabled) })
+            : node,
+        ),
+      })
     }
 
     /* ------------------------------------------------------------------ *
@@ -1018,6 +1141,12 @@ window.__ModuleLoader__.load({
           if (!error) error = { code, params: extra || {} }
         }
         const badField = (key) => fail('err.positive', { field: { i18n: key } })
+
+        if (isLayerDisabled(node)) {
+          const passthrough = inShapes.find((entry) => entry !== null) || null
+          state.set(id, { shape: passthrough, params: 0, error: null, disabled: true })
+          continue
+        }
 
         if (!spec) {
           fail('err.unknownType', { type: String(node.type) })
@@ -1200,9 +1329,11 @@ window.__ModuleLoader__.load({
       }
       for (const id of order) {
         const info = state.get(id)
+        if (info && info.disabled) continue
         if (!reachable.has(id) && info && !info.error) report('warn', 'err.unreachable', {}, id)
       }
       for (const node of nodes) {
+        if (isLayerDisabled(node)) continue
         const info = state.get(node.id)
         if (!info || info.error || node.type === 'output' || node.type === 'input') continue
         if (!outgoing.get(node.id).length) report('warn', 'err.deadEnd', {}, node.id)
@@ -1213,7 +1344,12 @@ window.__ModuleLoader__.load({
         const info = state.get(node.id)
         if (info) totalParams += info.params
       }
-      const errorCount = issues.filter((issue) => issue.severity === 'error').length
+      const outputShapes = outputNodes.map((node) => (state.get(node.id) ? state.get(node.id).shape : null)).filter(Boolean)
+      let errorCount = issues.filter((issue) => issue.severity === 'error').length
+      if (!errorCount && outputNodes.length && !outputShapes.length) {
+        report('error', 'err.unresolvedOutput', {})
+        errorCount += 1
+      }
       const warningCount = issues.filter((issue) => issue.severity === 'warning').length
       if (!errorCount && outputNodes.length) {
         if (totalParams === 0) report('warn', 'warn.noParams', {})
@@ -1224,7 +1360,7 @@ window.__ModuleLoader__.load({
         const inEdges = incoming.get(nodeId)
         if (inEdges.length !== 1) return false
         const source = byId.get(inEdges[0].from)
-        if (!source) return false
+        if (!source || isLayerDisabled(source)) return false
         if (source.type === 'activation') return source.params.activation === 'softmax'
         if (source.type === 'dense' || source.type === 'conv2d') return source.params.activation === 'softmax'
         return false
@@ -1242,11 +1378,11 @@ window.__ModuleLoader__.load({
         outputNodes,
         totalParams,
         sizeBytes: totalParams * 4,
-        outputShapes: outputNodes.map((node) => (state.get(node.id) ? state.get(node.id).shape : null)).filter(Boolean),
+        outputShapes,
         softmaxTail,
         errorCount,
         warningCount,
-        valid: errorCount === 0 && cyclic.length === 0 && inputNodes.length > 0 && outputNodes.length > 0,
+        valid: errorCount === 0 && cyclic.length === 0 && inputNodes.length > 0 && outputNodes.length > 0 && outputShapes.length > 0,
       }
     }
 
@@ -1413,6 +1549,12 @@ window.__ModuleLoader__.load({
         const inputsVars = (analysis.incoming.get(id) || []).map((edge) => vars.get(edge.from))
         const source = inputsVars[0]
         const shape = analysis.state.get(id).shape
+        if (isLayerDisabled(node)) {
+          const passthrough = inputsVars.find((value) => value !== undefined)
+          vars.set(id, passthrough)
+          if (passthrough) body.push('# ' + base + ': disabled, skipped')
+          continue
+        }
         switch (node.type) {
           case 'input':
             vars.set(id, base)
@@ -1630,6 +1772,10 @@ window.__ModuleLoader__.load({
         const inputVarsOfNode = (analysis.incoming.get(id) || []).map((edge) => vars.get(edge.from)).filter(Boolean)
         const source = inputVarsOfNode[0]
         const shape = analysis.state.get(id).shape
+        if (isLayerDisabled(node)) {
+          vars.set(id, inputVarsOfNode[0])
+          continue
+        }
         switch (node.type) {
           case 'input': {
             const name = String(node.params.name || base).slice(0, 48)
@@ -2192,6 +2338,7 @@ window.__ModuleLoader__.load({
         y: layer.y,
         title: layer.title,
         params: defaultParams(layer.type, layer.params),
+        disabled: false,
       }))
       const edges = []
       layers.forEach((layer, index) => {
@@ -2369,6 +2516,7 @@ window.__ModuleLoader__.load({
         y: source.y + 32,
         title: source.title + ' ' + I18N.t('inspector.duplicate'),
         params: Object.assign({}, source.params),
+        disabled: source.disabled === true,
       }
       return Object.assign({}, graph, { nodes: graph.nodes.concat(copy) })
     }
@@ -2498,6 +2646,9 @@ window.__ModuleLoader__.load({
   touch-action: none; }
 .nn-canvas.is-panning { cursor: grabbing; }
 .nn-canvas.is-connecting { cursor: crosshair; }
+.nn-canvas.is-selecting { cursor: crosshair; }
+.nn-marquee { position: absolute; z-index: 6; border: 1px solid var(--dsw-alias-brand-primary);
+  background: rgba(59, 130, 246, 0.12); border-radius: 3px; pointer-events: none; }
 .nn-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .nn-edges { position: absolute; overflow: visible; pointer-events: none; }
 .nn-edge { fill: none; stroke-width: 1.8; vector-effect: non-scaling-stroke; opacity: 0.85; pointer-events: none; }
@@ -2513,6 +2664,9 @@ window.__ModuleLoader__.load({
 .nn-node:hover { border-color: var(--dsw-alias-border-l2); }
 .nn-node.is-selected { border-color: var(--dsw-alias-brand-primary); box-shadow: 0 0 0 1px var(--dsw-alias-brand-primary), 0 4px 14px rgba(0, 0, 0, 0.14); }
 .nn-node.is-error { border-color: var(--dsw-alias-state-error-primary); }
+.nn-node.is-disabled { border-style: dashed; background: var(--dsw-alias-bg-layer-2); }
+.nn-node.is-disabled .nn-node-title, .nn-node.is-disabled .nn-node-glyph, .nn-node.is-disabled .nn-node-type,
+.nn-node.is-disabled .nn-node-body { opacity: 0.55; }
 .nn-node.is-dragging { cursor: grabbing; box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22); z-index: 3; }
 .nn-node-head { display: flex; align-items: center; gap: 6px; padding: 6px 9px 4px 11px; min-width: 0; }
 .nn-node-glyph { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;
@@ -2521,6 +2675,11 @@ window.__ModuleLoader__.load({
   text-overflow: ellipsis; white-space: nowrap; }
 .nn-node-type { flex: 0 0 auto; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.04em;
   color: var(--dsw-alias-label-secondary); }
+.nn-node-power { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;
+  flex: 0 0 18px; padding: 0; border: 0; border-radius: 4px; background: transparent;
+  color: var(--dsw-alias-label-secondary); cursor: pointer; }
+.nn-node-power:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); }
+.nn-node-power.is-off { color: var(--dsw-alias-state-warn-primary); }
 .nn-node-body { padding: 0 11px; font-size: 11px; color: var(--dsw-alias-label-secondary); overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; }
 .nn-node-foot { display: flex; align-items: center; gap: 6px; padding: 5px 11px 0; font-size: 10.5px; min-width: 0; }
@@ -2528,6 +2687,9 @@ window.__ModuleLoader__.load({
   color: var(--dsw-alias-label-secondary); max-width: 118px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nn-node-shape.is-bad { color: var(--dsw-alias-state-error-primary); }
 .nn-node-params { margin-left: auto; color: var(--dsw-alias-label-secondary); font-variant-numeric: tabular-nums; }
+.nn-node-disabled-chip { display: inline-flex; align-items: center; padding: 0 5px; border-radius: 999px;
+  border: 1px solid var(--dsw-alias-state-warn-primary); color: var(--dsw-alias-state-warn-primary);
+  font-size: 9px; line-height: 1.4; white-space: nowrap; }
 .nn-node-alert { position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; background: var(--dsw-alias-state-error-primary);
   color: #fff; font-size: 11px; font-weight: 700; border: 2px solid var(--dsw-alias-bg-base); }
@@ -2633,6 +2795,7 @@ window.__ModuleLoader__.load({
 .nn-issue:hover { border-color: var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-2); }
 .nn-issue-dot { width: 7px; height: 7px; margin-top: 5px; border-radius: 50%; flex: 0 0 7px;
   background: var(--dsw-alias-state-error-primary); }
+.nn-issue-dot.is-node { background: var(--dsw-alias-brand-primary); }
 .nn-issue.is-warn .nn-issue-dot { background: var(--dsw-alias-state-warn-primary); }
 .nn-issue-text { flex: 1 1 auto; min-width: 0; }
 .nn-issue-node { display: block; margin-top: 2px; font-size: 10px; color: var(--dsw-alias-label-secondary); }
@@ -2936,6 +3099,13 @@ window.__ModuleLoader__.load({
           return h('svg', common, h('path', { d: 'M12 3v12m-4-4 4 4 4-4M4 20h16' }))
         case 'spark':
           return h('svg', common, h('path', { d: 'M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8' }))
+        case 'power':
+          return h(
+            'svg',
+            common,
+            h('path', { d: 'M12 3v9' }),
+            h('path', { d: 'M7.6 5.6a8 8 0 1 0 8.8 0' }),
+          )
         case 'globe':
           return h(
             'svg',
@@ -3194,11 +3364,13 @@ window.__ModuleLoader__.load({
       const shape = info ? info.shape : null
       const error = info ? info.error : null
       const inputCount = (props.analysis.incoming.get(node.id) || []).length
+      const disabled = isLayerDisabled(node)
       const drag = useRef(null)
       const [dragging, setDragging] = useState(false)
       const classes = ['nn-node']
       if (props.selected) classes.push('is-selected')
       if (error) classes.push('is-error')
+      if (disabled) classes.push('is-disabled')
       if (dragging) classes.push('is-dragging')
 
       const onPointerDown = (event) => {
@@ -3206,7 +3378,9 @@ window.__ModuleLoader__.load({
         if (event.target && event.target.closest && event.target.closest('.nn-port')) return
         event.stopPropagation()
         event.preventDefault()
-        props.onSelect(node.id)
+        const additive = event.ctrlKey || event.metaKey
+        props.onSelect(node.id, additive)
+        if (additive) return
         drag.current = {
           pointerId: event.pointerId,
           clientX: event.clientX,
@@ -3254,7 +3428,7 @@ window.__ModuleLoader__.load({
           style: { left: node.x, top: node.y, width: NODE_W, '--nn-accent': spec.color },
           'data-node-id': node.id,
           role: 'group',
-          'aria-label': node.title + ' · ' + t('node.' + node.type),
+          'aria-label': node.title + ' · ' + t('node.' + node.type) + (disabled ? ' · ' + t('node.disabled') : ''),
           onPointerDown,
           onPointerMove,
           onPointerUp,
@@ -3266,11 +3440,33 @@ window.__ModuleLoader__.load({
           h('span', { className: 'nn-node-glyph' }, h(TypeGlyph, { type: node.type, size: 14 })),
           h('span', { className: 'nn-node-title', title: node.title }, node.title),
           h('span', { className: 'nn-node-type' }, t('node.' + node.type)),
+          node.type !== 'input' && node.type !== 'output'
+            ? h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'nn-node-power' + (disabled ? ' is-off' : ''),
+                  title: t(disabled ? 'node.enable' : 'node.disable'),
+                  'aria-label': t(disabled ? 'node.enable' : 'node.disable'),
+                  'aria-pressed': disabled,
+                  onPointerDown: (event) => {
+                    event.stopPropagation()
+                    event.preventDefault()
+                  },
+                  onClick: (event) => {
+                    event.stopPropagation()
+                    props.onToggleDisabled(node.id)
+                  },
+                },
+                h(Icon, { name: 'power', size: 12 }),
+              )
+            : null,
         ),
         h('div', { className: 'nn-node-body' }, nodeSummary(node, inputCount)),
         h(
           'div',
           { className: 'nn-node-foot' },
+          disabled ? h('span', { className: 'nn-node-disabled-chip' }, t('node.disabled')) : null,
           h(
             'span',
             {
@@ -3575,6 +3771,7 @@ window.__ModuleLoader__.load({
             'sc.undo',
             'sc.redo',
             'sc.delete',
+            'sc.marquee',
             'sc.duplicate',
             'sc.fit',
           ].map((key) =>
@@ -3594,9 +3791,70 @@ window.__ModuleLoader__.load({
       const graph = props.graph
       const analysis = props.analysis
       const selection = props.selection
-      if (selection && selection.kind === 'node') {
-        const node = graph.nodes.find((entry) => entry.id === selection.id)
+      const nodeIds = selectionNodes(selection)
+      const edgeId = selectionEdgeId(selection)
+      if (nodeIds.length > 1) {
+        const nodes = nodeIds
+          .map((id) => graph.nodes.find((entry) => entry.id === id))
+          .filter(Boolean)
+        const toggleable = nodes.filter((node) => node.type !== 'input' && node.type !== 'output')
+        const allDisabled = toggleable.length > 0 && toggleable.every((node) => node.disabled === true)
+        return h(
+          'div',
+          null,
+          h(
+            'div',
+            { className: 'nn-empty' },
+            h(Icon, { name: 'power', size: 26 }),
+            h('strong', null, t('inspector.multiTitle', { count: nodes.length })),
+            h('p', null, t('inspector.multiBody')),
+          ),
+          h(
+            'div',
+            { className: 'nn-issue-group' },
+            h(
+              'div',
+              { className: 'nn-issue-group-title' },
+              h('span', null, t('model.layers')),
+              h('span', { className: 'nn-badge' }, String(nodes.length)),
+            ),
+            nodes.map((node) =>
+              h(
+                'button',
+                {
+                  key: node.id,
+                  type: 'button',
+                  className: 'nn-issue',
+                  onClick: () => props.onLocate(node.id),
+                },
+                h('span', { className: 'nn-issue-dot is-node' }),
+                h(
+                  'span',
+                  { className: 'nn-issue-text' },
+                  node.title,
+                  node.disabled ? h('span', { className: 'nn-issue-node' }, t('node.disabled')) : null,
+                ),
+              ),
+            ),
+          ),
+          h(
+            'div',
+            { className: 'nn-actions' },
+            toggleable.length
+              ? h(Button, {
+                  icon: 'power',
+                  label: t(allDisabled ? 'inspector.enableSelected' : 'inspector.disableSelected'),
+                  onClick: () => props.onSetDisabledSelected(!allDisabled),
+                })
+              : null,
+            h(Button, { icon: 'trash', label: t('inspector.delete'), danger: true, onClick: props.onDelete }),
+          ),
+        )
+      }
+      if (nodeIds.length === 1) {
+        const node = graph.nodes.find((entry) => entry.id === nodeIds[0])
         if (!node) return h(EmptyInspector, props)
+        const disabled = isLayerDisabled(node)
         const info = analysis.state.get(node.id)
         const spec = NODE_SPECS[node.type]
         const fields = FIELDS[node.type] || []
@@ -3656,6 +3914,26 @@ window.__ModuleLoader__.load({
                 h('span', null, t(info.error.code, info.error.params)),
               )
             : null,
+          disabled
+            ? h(
+                'div',
+                { className: 'nn-note is-warn' },
+                h(Icon, { name: 'power', size: 14 }),
+                h('span', null, t('inspector.disabledNote')),
+              )
+            : null,
+          node.type !== 'input' && node.type !== 'output'
+            ? h(
+                'div',
+                { className: 'nn-actions' },
+                h(Button, {
+                  icon: 'power',
+                  label: t(disabled ? 'node.enable' : 'node.disable'),
+                  active: disabled,
+                  onClick: () => props.onToggleDisabled(node.id),
+                }),
+              )
+            : null,
           h(
             'div',
             { className: 'nn-actions' },
@@ -3671,8 +3949,8 @@ window.__ModuleLoader__.load({
             : null,
         )
       }
-      if (selection && selection.kind === 'edge') {
-        const edge = graph.edges.find((entry) => entry.id === selection.id)
+      if (edgeId) {
+        const edge = graph.edges.find((entry) => entry.id === edgeId)
         if (!edge) return h(EmptyInspector, props)
         const from = graph.nodes.find((entry) => entry.id === edge.from)
         const to = graph.nodes.find((entry) => entry.id === edge.to)
@@ -3893,7 +4171,7 @@ window.__ModuleLoader__.load({
                   return h(
                     'tr',
                     { key: node.id, onClick: () => props.onLocate(node.id) },
-                    h('td', null, node.title),
+                    h('td', null, node.title + (isLayerDisabled(node) ? ' · ' + t('node.disabled') : '')),
                     h('td', null, t('node.' + node.type)),
                     h('td', { className: 'is-mono' + (info && info.error ? ' is-error' : '') }, info && info.shape ? formatShape(info.shape) : '—'),
                     h('td', { className: 'is-num' }, info ? compactCount(info.params) : '0'),
@@ -4168,11 +4446,13 @@ window.__ModuleLoader__.load({
       const [framework, setFramework] = useState('pytorch')
       const [codeSection, setCodeSection] = useState('model')
       const [panning, setPanning] = useState(false)
+      const [marquee, setMarquee] = useState(null)
       const [uiLocale, setUiLocale] = useState(UI_LOCALE)
 
       const canvasRef = useRef(null)
       const fileRef = useRef(null)
       const panRef = useRef(null)
+      const marqueeRef = useRef(null)
       const dragSnapshotRef = useRef(null)
       const toastTimerRef = useRef(null)
       const didFitRef = useRef(false)
@@ -4312,7 +4592,7 @@ window.__ModuleLoader__.load({
           x: rect.width / 2 - (node.x + NODE_W / 2) * zoom,
           y: rect.height / 2 - (node.y + NODE_H / 2) * zoom,
         })
-        setSelection({ kind: 'node', id })
+        setSelection({ nodes: [id], edge: null })
       }, [])
 
       useEffect(() => {
@@ -4367,8 +4647,17 @@ window.__ModuleLoader__.load({
         })
       }, [])
 
-      const handleSelectNode = useCallback((id) => {
-        setSelection({ kind: 'node', id })
+      const handleSelectNode = useCallback((id, additive) => {
+        if (additive) {
+          setSelection((previous) => {
+            const ids = selectionNodes(previous)
+            const next = ids.includes(id) ? ids.filter((entry) => entry !== id) : ids.concat(id)
+            return next.length ? { nodes: next, edge: null } : null
+          })
+          setTab('props')
+          return
+        }
+        setSelection({ nodes: [id], edge: null })
         setTab('props')
       }, [])
 
@@ -4477,20 +4766,20 @@ window.__ModuleLoader__.load({
 
       const deleteSelected = useCallback(() => {
         const current = selectionRef.current
-        if (!current) return
-        dispatch({
-          type: 'mutate',
-          update: (latest) =>
-            current.kind === 'node' ? removeNode(latest, current.id) : removeEdge(latest, current.id),
-        })
+        const ids = new Set(selectionNodes(current))
+        const edgeId = selectionEdgeId(current)
+        if (!ids.size && !edgeId) return
+        dispatch({ type: 'mutate', update: (latest) => removeSelected(latest, current) })
         setSelection(null)
-        notify(t(current.kind === 'node' ? 'toast.nodeDeleted' : 'toast.edgeDeleted'), 'success')
+        if (ids.size) notify(t('toast.nodesDeleted', { count: ids.size }), 'success')
+        else notify(t('toast.edgeDeleted'), 'success')
       }, [notify, t])
 
       const duplicateSelected = useCallback(() => {
         const current = selectionRef.current
-        if (!current || current.kind !== 'node') return
-        const source = graphRef.current.nodes.find((entry) => entry.id === current.id)
+        const ids = selectionNodes(current)
+        if (ids.length !== 1) return
+        const source = graphRef.current.nodes.find((entry) => entry.id === ids[0])
         if (!source) return
         const copy = {
           id: makeId('n'),
@@ -4499,12 +4788,41 @@ window.__ModuleLoader__.load({
           y: source.y + 32,
           title: source.title + ' ' + t('inspector.duplicate'),
           params: Object.assign({}, source.params),
+          disabled: source.disabled === true,
         }
         dispatch({ type: 'mutate', update: (latest) => Object.assign({}, latest, { nodes: latest.nodes.concat(copy) }) })
-        setSelection({ kind: 'node', id: copy.id })
+        setSelection({ nodes: [copy.id], edge: null })
         setTab('props')
         notify(t('toast.nodeAdded', { name: copy.title }), 'success')
       }, [notify, t])
+
+      const toggleNodeDisabled = useCallback(
+        (id) => {
+          const node = graphRef.current.nodes.find((entry) => entry.id === id)
+          if (!node || node.type === 'input' || node.type === 'output') return
+          const next = !node.disabled
+          dispatch({ type: 'mutate', update: (latest) => setNodesDisabled(latest, [id], next) })
+          notify(t(next ? 'toast.nodeDisabled' : 'toast.nodeEnabled'), 'success')
+        },
+        [notify, t],
+      )
+
+      const setSelectedDisabled = useCallback(
+        (disabled) => {
+          const ids = selectionNodes(selectionRef.current)
+          const count = ids.filter((id) => {
+            const node = graphRef.current.nodes.find((entry) => entry.id === id)
+            return node && node.type !== 'input' && node.type !== 'output'
+          }).length
+          if (!count) return
+          dispatch({ type: 'mutate', update: (latest) => setNodesDisabled(latest, ids, disabled) })
+          notify(
+            t(disabled ? 'toast.nodesDisabled' : 'toast.nodesEnabled', { count }),
+            'success',
+          )
+        },
+        [notify, t],
+      )
 
       const removeEdgeById = useCallback(
         (id) => {
@@ -4528,10 +4846,9 @@ window.__ModuleLoader__.load({
       const addFromPalette = useCallback(
         (type) => {
           const current = graphRef.current
+          const selectedIds = selectionNodes(selectionRef.current)
           const selected =
-            selectionRef.current && selectionRef.current.kind === 'node'
-              ? current.nodes.find((entry) => entry.id === selectionRef.current.id)
-              : null
+            selectedIds.length === 1 ? current.nodes.find((entry) => entry.id === selectedIds[0]) : null
           let x
           let y
           if (selected) {
@@ -4556,7 +4873,7 @@ window.__ModuleLoader__.load({
             fromId = selected.id
           }
           dispatch({ type: 'mutate', update: (latest) => addNode(latest, node, fromId) })
-          setSelection({ kind: 'node', id: node.id })
+          setSelection({ nodes: [node.id], edge: null })
           setTab('props')
           notify(t('toast.nodeAdded', { name: node.title }), 'success')
         },
@@ -4568,6 +4885,27 @@ window.__ModuleLoader__.load({
         const target = event.target
         if (target && target.closest && target.closest('.nn-canvas-chrome, .nn-empty-card')) return
         if (target && target.closest && target.closest('.nn-node')) return
+        if ((event.ctrlKey || event.metaKey) && event.button === 0) {
+          const rect = event.currentTarget.getBoundingClientRect()
+          const startX = event.clientX - rect.left
+          const startY = event.clientY - rect.top
+          setSelection(null)
+          marqueeRef.current = {
+            pointerId: event.pointerId,
+            startClientX: event.clientX,
+            startClientY: event.clientY,
+            startX,
+            startY,
+          }
+          setMarquee({ x0: startX, y0: startY, x1: startX, y1: startY })
+          try {
+            event.currentTarget.setPointerCapture(event.pointerId)
+          } catch (_captureFailed) {
+            /* pointer capture is best effort */
+          }
+          event.preventDefault()
+          return
+        }
         setSelection(null)
         panRef.current = {
           pointerId: event.pointerId,
@@ -4586,6 +4924,17 @@ window.__ModuleLoader__.load({
       }
 
       const onCanvasPointerMove = (event) => {
+        const gesture = marqueeRef.current
+        if (gesture && gesture.pointerId === event.pointerId) {
+          const rect = event.currentTarget.getBoundingClientRect()
+          setMarquee({
+            x0: gesture.startX,
+            y0: gesture.startY,
+            x1: event.clientX - rect.left,
+            y1: event.clientY - rect.top,
+          })
+          return
+        }
         const pan = panRef.current
         if (!pan || pan.pointerId !== event.pointerId) return
         setView({
@@ -4596,7 +4945,39 @@ window.__ModuleLoader__.load({
       }
 
       const onCanvasPointerUp = (event) => {
+        const gesture = marqueeRef.current
+        if (gesture && gesture.pointerId === event.pointerId) {
+          marqueeRef.current = null
+          setMarquee(null)
+          const start = clientToWorld(gesture.startClientX, gesture.startClientY)
+          const end = clientToWorld(event.clientX, event.clientY)
+          const left = Math.min(start.x, end.x)
+          const right = Math.max(start.x, end.x)
+          const top = Math.min(start.y, end.y)
+          const bottom = Math.max(start.y, end.y)
+          const ids = nodesInRect(graphRef.current.nodes, { left, right, top, bottom })
+          setSelection(ids.length ? { nodes: ids, edge: null } : null)
+          if (ids.length) setTab('props')
+          try {
+            event.currentTarget.releasePointerCapture(event.pointerId)
+          } catch (_releaseFailed) {
+            /* pointer capture is best effort */
+          }
+          return
+        }
         if (!panRef.current) return
+        panRef.current = null
+        setPanning(false)
+        try {
+          event.currentTarget.releasePointerCapture(event.pointerId)
+        } catch (_releaseFailed) {
+          /* pointer capture is best effort */
+        }
+      }
+
+      const onCanvasPointerCancel = (event) => {
+        marqueeRef.current = null
+        setMarquee(null)
         panRef.current = null
         setPanning(false)
         try {
@@ -4724,7 +5105,8 @@ window.__ModuleLoader__.load({
           }
           if (editable) return
           if (event.key === 'Delete' || event.key === 'Backspace') {
-            if (selectionRef.current) {
+            const current = selectionRef.current
+            if (selectionNodes(current).length || selectionEdgeId(current)) {
               event.preventDefault()
               deleteSelected()
             }
@@ -4747,8 +5129,13 @@ window.__ModuleLoader__.load({
 
       useEffect(() => {
         if (!selection) return
-        if (selection.kind === 'node' && !graph.nodes.some((node) => node.id === selection.id)) setSelection(null)
-        if (selection.kind === 'edge' && !graph.edges.some((edge) => edge.id === selection.id)) setSelection(null)
+        const selectedNodeIds = selectionNodes(selection)
+        const keptNodes = selectedNodeIds.filter((id) => graph.nodes.some((node) => node.id === id))
+        const edgeId = selectionEdgeId(selection)
+        const keptEdge = edgeId && graph.edges.some((edge) => edge.id === edgeId) ? edgeId : null
+        if (keptNodes.length !== selectedNodeIds.length || keptEdge !== edgeId) {
+          setSelection(keptNodes.length || keptEdge ? { nodes: keptNodes, edge: keptEdge } : null)
+        }
       }, [graph, selection])
 
       const nodes = graph.nodes
@@ -4786,7 +5173,7 @@ window.__ModuleLoader__.load({
         const ty = target.y + NODE_H / 2 - minY
         const dx = Math.max(60, Math.abs(tx - sx) * 0.45)
         const path = `M ${sx} ${sy} C ${sx + dx} ${sy}, ${tx - dx} ${ty}, ${tx} ${ty}`
-        const selected = selection && selection.kind === 'edge' && selection.id === edge.id
+        const selected = selectionEdgeId(selection) === edge.id
         const color = selected ? 'var(--dsw-alias-brand-primary)' : NODE_SPECS[source.type].color
         return h(
           'g',
@@ -4803,7 +5190,7 @@ window.__ModuleLoader__.load({
             onPointerDown: (event) => event.stopPropagation(),
             onClick: (event) => {
               event.stopPropagation()
-              setSelection({ kind: 'edge', id: edge.id })
+              setSelection({ nodes: [], edge: edge.id })
             },
             onDoubleClick: (event) => {
               event.stopPropagation()
@@ -4935,7 +5322,7 @@ window.__ModuleLoader__.load({
           h(
             'div',
             {
-              className: 'nn-canvas' + (panning ? ' is-panning' : '') + (connect ? ' is-connecting' : ''),
+              className: 'nn-canvas' + (panning ? ' is-panning' : '') + (connect ? ' is-connecting' : '') + (marquee ? ' is-selecting' : ''),
               ref: canvasRef,
               style: {
                 backgroundSize: 22 * view.zoom + 'px ' + 22 * view.zoom + 'px',
@@ -4944,7 +5331,7 @@ window.__ModuleLoader__.load({
               onPointerDown: onCanvasPointerDown,
               onPointerMove: onCanvasPointerMove,
               onPointerUp: onCanvasPointerUp,
-              onPointerCancel: onCanvasPointerUp,
+              onPointerCancel: onCanvasPointerCancel,
             },
             h(
               'div',
@@ -4988,12 +5375,13 @@ window.__ModuleLoader__.load({
                   node,
                   analysis,
                   zoom: view.zoom,
-                  selected: Boolean(selection && selection.kind === 'node' && selection.id === node.id),
+                  selected: nodeIsSelected(selection, node.id),
                   onSelect: handleSelectNode,
                   onDragStart: beginNodeDrag,
                   onMove: moveNodeCard,
                   onDragEnd: endNodeDrag,
                   onStartConnect: handleStartConnect,
+                  onToggleDisabled: toggleNodeDisabled,
                 }),
               ),
             ),
@@ -5025,6 +5413,17 @@ window.__ModuleLoader__.load({
                 )
               : null,
             connect ? h('div', { className: 'nn-connecting-chip' }, h(Icon, { name: 'spark', size: 12 }), t('canvas.connecting')) : null,
+            marquee
+              ? h('div', {
+                  className: 'nn-marquee',
+                  style: {
+                    left: Math.min(marquee.x0, marquee.x1),
+                    top: Math.min(marquee.y0, marquee.y1),
+                    width: Math.abs(marquee.x1 - marquee.x0),
+                    height: Math.abs(marquee.y1 - marquee.y0),
+                  },
+                })
+              : null,
             h(
               'div',
               { className: 'nn-canvas-chrome' },
@@ -5057,6 +5456,8 @@ window.__ModuleLoader__.load({
                 onDelete: deleteSelected,
                 onDeleteEdge: removeEdgeById,
                 onDisconnect: disconnectInputs,
+                onToggleDisabled: toggleNodeDisabled,
+                onSetDisabledSelected: setSelectedDisabled,
                 onLocate: locateNode,
                 onTraining: updateTraining,
                 framework,

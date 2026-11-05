@@ -7,6 +7,8 @@ A visual neural-network workbench that lives in the DeepSeek Harness sidebar. Dr
 ## Features
 
 - **Visual graph editor** — 14 layer types, draggable cards, port-to-port connections, pan/zoom, multi-input `Add` / `Concat` merges, undo/redo, and keyboard shortcuts.
+- **Marquee selection** — hold `Ctrl` (or `Cmd`) and drag on empty canvas to box-select layers; `Backspace` or `Delete` removes the whole selection.
+- **Layer bypass** — the power button on a layer (or the Node tab) temporarily disables it. Checks and code export skip the layer and pass its input shape through, with a visible disabled state.
 - **Live shape inference** — every layer resolves its output shape and parameter count as you edit. The checker reports rank mismatches, invalid convolution/pooling sizes, channel/group divisibility, merge mismatches, cycles, missing inputs, and missing output layers.
 - **Model summary** — layer count, total parameters, model size, input/output shapes, and a per-layer table.
 - **Inspector** — per-layer parameters, validation issues that jump to the offending node, training configuration, and generated source.
@@ -41,6 +43,8 @@ The Host half (`index.js`) is intentionally empty: the workbench runs entirely i
 - Drag an output port (right side of a card) onto an input port (left side) to connect layers.
 - Click a layer to edit it in the **Node** tab. Invalid layers turn red with an explanation in **Checks**.
 - Add layers from the library; when a selected layer has no outgoing connection, the new layer is connected automatically.
+- Hold `Ctrl` (or `Cmd`) and drag on empty canvas to marquee-select several layers; `Backspace` or `Delete` removes them.
+- Click the power control on a layer (or use the Node tab) to disable it temporarily. Disabled layers are dimmed, skipped by checks and export, and pass their input shape to downstream layers.
 - Use **Templates** for a ready-made network, then **Model** to adjust training settings and **Code** to export.
 - Press `Delete` to remove the selection, `Ctrl+Z` / `Ctrl+Shift+Z` for undo/redo, `Ctrl+D` to duplicate, and `F` to fit the graph. The `EN/中` toolbar button switches the interface language and remembers the choice.
 
@@ -80,6 +84,8 @@ Pixel-level browser verification is environment-dependent; open the panel and ch
 主要功能：
 
 - 14 种层与节点图编辑：拖动、连线、平移缩放、撤销重做；
+- 框选与批量删除：按住 `Ctrl`（或 `Cmd`）在空白处拖动框选多个层，按 `Backspace` 或 `Delete` 删除所选；
+- 临时禁用层：节点上的电源按钮或「属性」面板可禁用某一层，检查与代码导出会跳过它，并把输入形状透传给下游；
 - 实时形状推导与检查：卷积/池化尺寸、分组整除、合并层形状、循环连接、缺少输入/输出；
 - 模型面板：层数、参数量、模型大小、逐层明细、训练配置；
 - 代码面板：PyTorch / Keras 模型、训练脚本、依赖清单，可复制或下载；
