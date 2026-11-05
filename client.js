@@ -11,6 +11,7 @@ window.__ModuleLoader__.load({
 
     const NS = 'nnStudio'
     const PANEL_ID = 'nn-studio'
+    const PLUGIN_VERSION = '1.3.1'
     const STORE_KEY = 'dsh.nn-studio.graph.v1'
     const LOCALE_KEY = 'dsh.nn-studio.locale.v1'
     const MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace'
@@ -67,6 +68,7 @@ window.__ModuleLoader__.load({
       'node.disabled': '已禁用',
       'node.disable': '禁用该层',
       'node.enable': '启用该层',
+      'node.locked': '输入 / 输出层是模型边界，不能禁用',
       'canvas.empty': '从节点库添加第一层',
       'canvas.emptyHint': '或者从一个模板开始，几秒得到一个可运行的网络。',
       'canvas.hint': '拖动空白处平移 · 滚轮缩放 · 端口拖拽连线 · Ctrl+拖动框选 · Delete/Backspace 删除',
@@ -325,6 +327,7 @@ window.__ModuleLoader__.load({
       'node.disabled': 'Disabled',
       'node.disable': 'Disable layer',
       'node.enable': 'Enable layer',
+      'node.locked': 'Input and Output layers are model boundaries and cannot be disabled',
       'canvas.empty': 'Add your first layer',
       'canvas.emptyHint': 'Or start from a template and get a runnable network in seconds.',
       'canvas.hint': 'Drag empty space to pan · Wheel to zoom · Drag ports to connect · Ctrl+drag to marquee-select · Delete/Backspace to remove',
@@ -2600,6 +2603,7 @@ window.__ModuleLoader__.load({
 .nn-name:focus { outline: none; border-color: var(--dsw-alias-brand-primary); background: var(--dsw-alias-bg-base); }
 .nn-brand-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dsw-alias-label-secondary);
   white-space: nowrap; overflow: hidden; }
+.nn-version { font-family: ${MONO}; font-size: 9.5px; color: var(--dsw-alias-label-secondary); opacity: 0.8; }
 .nn-toolbar { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 .nn-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; height: 28px; padding: 0 9px;
   border-radius: 7px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1);
@@ -2675,11 +2679,13 @@ window.__ModuleLoader__.load({
   text-overflow: ellipsis; white-space: nowrap; }
 .nn-node-type { flex: 0 0 auto; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.04em;
   color: var(--dsw-alias-label-secondary); }
-.nn-node-power { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;
-  flex: 0 0 18px; padding: 0; border: 0; border-radius: 4px; background: transparent;
-  color: var(--dsw-alias-label-secondary); cursor: pointer; }
-.nn-node-power:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); }
-.nn-node-power.is-off { color: var(--dsw-alias-state-warn-primary); }
+.nn-node-power { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px;
+  flex: 0 0 22px; padding: 0; border: 1px solid var(--dsw-alias-border-l1); border-radius: 5px;
+  background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-secondary); cursor: pointer; }
+.nn-node-power:hover:not(.is-locked) { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary);
+  border-color: var(--dsw-alias-border-l2); }
+.nn-node-power.is-off { color: var(--dsw-alias-state-warn-primary); border-color: var(--dsw-alias-state-warn-primary); }
+.nn-node-power.is-locked { opacity: 0.35; cursor: default; }
 .nn-node-body { padding: 0 11px; font-size: 11px; color: var(--dsw-alias-label-secondary); overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; }
 .nn-node-foot { display: flex; align-items: center; gap: 6px; padding: 5px 11px 0; font-size: 10.5px; min-width: 0; }
@@ -3365,6 +3371,7 @@ window.__ModuleLoader__.load({
       const error = info ? info.error : null
       const inputCount = (props.analysis.incoming.get(node.id) || []).length
       const disabled = isLayerDisabled(node)
+      const locked = node.type === 'input' || node.type === 'output'
       const drag = useRef(null)
       const [dragging, setDragging] = useState(false)
       const classes = ['nn-node']
@@ -3440,27 +3447,26 @@ window.__ModuleLoader__.load({
           h('span', { className: 'nn-node-glyph' }, h(TypeGlyph, { type: node.type, size: 14 })),
           h('span', { className: 'nn-node-title', title: node.title }, node.title),
           h('span', { className: 'nn-node-type' }, t('node.' + node.type)),
-          node.type !== 'input' && node.type !== 'output'
-            ? h(
-                'button',
-                {
-                  type: 'button',
-                  className: 'nn-node-power' + (disabled ? ' is-off' : ''),
-                  title: t(disabled ? 'node.enable' : 'node.disable'),
-                  'aria-label': t(disabled ? 'node.enable' : 'node.disable'),
-                  'aria-pressed': disabled,
-                  onPointerDown: (event) => {
-                    event.stopPropagation()
-                    event.preventDefault()
-                  },
-                  onClick: (event) => {
-                    event.stopPropagation()
-                    props.onToggleDisabled(node.id)
-                  },
-                },
-                h(Icon, { name: 'power', size: 12 }),
-              )
-            : null,
+          h(
+            'button',
+            {
+              type: 'button',
+              className: 'nn-node-power' + (disabled ? ' is-off' : '') + (locked ? ' is-locked' : ''),
+              title: locked ? t('node.locked') : t(disabled ? 'node.enable' : 'node.disable'),
+              'aria-label': locked ? t('node.locked') : t(disabled ? 'node.enable' : 'node.disable'),
+              'aria-pressed': locked ? undefined : disabled,
+              'aria-disabled': locked,
+              onPointerDown: (event) => {
+                event.stopPropagation()
+                event.preventDefault()
+              },
+              onClick: (event) => {
+                event.stopPropagation()
+                if (!locked) props.onToggleDisabled(node.id)
+              },
+            },
+            h(Icon, { name: 'power', size: 14 }),
+          ),
         ),
         h('div', { className: 'nn-node-body' }, nodeSummary(node, inputCount)),
         h(
@@ -5217,6 +5223,13 @@ window.__ModuleLoader__.load({
         : analysis.warningCount
           ? analysis.warningCount + ' ' + t('checks.warnings')
           : t('checks.okTitle')
+      const selectedIds = selectionNodes(selection)
+      const primarySelectedNode =
+        selectedIds.length === 1 ? graph.nodes.find((node) => node.id === selectedIds[0]) : null
+      const canTogglePrimary =
+        primarySelectedNode &&
+        primarySelectedNode.type !== 'input' &&
+        primarySelectedNode.type !== 'output'
 
       return h(
         'div',
@@ -5252,6 +5265,7 @@ window.__ModuleLoader__.load({
                       analysis.errorCount + ' ' + t('checks.errors'),
                     )
                   : h('span', { className: 'nn-badge is-ok' }, t('checks.okTitle')),
+                h('span', { className: 'nn-version', title: 'Neural Network Studio ' + PLUGIN_VERSION }, 'v' + PLUGIN_VERSION),
               ),
             ),
           ),
@@ -5290,6 +5304,15 @@ window.__ModuleLoader__.load({
               title: t('header.language'),
               onClick: toggleLocale,
             }),
+            canTogglePrimary
+              ? h(Button, {
+                  icon: 'power',
+                  label: t(primarySelectedNode.disabled ? 'node.enable' : 'node.disable'),
+                  title: t(primarySelectedNode.disabled ? 'node.enable' : 'node.disable'),
+                  active: Boolean(primarySelectedNode.disabled),
+                  onClick: () => toggleNodeDisabled(primarySelectedNode.id),
+                })
+              : null,
             h(Button, {
               icon: 'panelLeft',
               variant: 'icon',
@@ -5547,7 +5570,7 @@ window.__ModuleLoader__.load({
             {
               name: 'sidebar.panellist',
               id: PANEL_ID,
-              order: 23,
+              order: 24,
               label: () => I18N.t('nav.title'),
             },
             SidebarIcon,

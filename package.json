@@ -1,6 +1,6 @@
 {
   "name": "@local/nn-studio",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "private": true,
   "type": "module",
   "description": "Neural Network Studio: design neural networks on a visual node graph with shape inference, validation, parameter statistics, exportable PyTorch/Keras code, and training scripts.",
