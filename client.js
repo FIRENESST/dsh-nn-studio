@@ -11,7 +11,7 @@ window.__ModuleLoader__.load({
 
     const NS = 'nnStudio'
     const PANEL_ID = 'nn-studio'
-    const PLUGIN_VERSION = '1.3.1'
+    const PLUGIN_VERSION = '1.4.0'
     const STORE_KEY = 'dsh.nn-studio.graph.v1'
     const LOCALE_KEY = 'dsh.nn-studio.locale.v1'
     const MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace'
@@ -65,6 +65,14 @@ window.__ModuleLoader__.load({
       'node.lstm': 'LSTM',
       'node.add': '相加',
       'node.concat': '拼接',
+      'node.conv1d': '一维卷积',
+      'node.globalavgpool2d': '全局平均池化',
+      'node.globalmaxpool2d': '全局最大池化',
+      'node.layernorm': '层归一化',
+      'node.groupnorm': '组归一化',
+      'node.gru': 'GRU',
+      'node.simplernn': 'RNN',
+      'node.multiply': '相乘',
       'node.disabled': '已禁用',
       'node.disable': '禁用该层',
       'node.enable': '启用该层',
@@ -81,6 +89,10 @@ window.__ModuleLoader__.load({
       'summary.bidirectional': '双向',
       'summary.residual': '残差',
       'summary.skip': '跳跃',
+      'summary.globalAvgPool': '全局平均',
+      'summary.globalMaxPool': '全局最大',
+      'summary.layerNorm': '最后一维归一化',
+      'summary.groupNorm': '{groups} 组归一化',
       'port.input': '输入端口',
       'port.output': '输出端口',
       'param.count': '参数',
@@ -215,6 +227,8 @@ window.__ModuleLoader__.load({
       'templates.resnet.desc': '带跳跃连接的卷积块，演示 Add 合并与批归一化。',
       'templates.lstm.title': 'LSTM 文本分类',
       'templates.lstm.desc': '词嵌入 + LSTM 编码 + 全连接，处理 token 序列。',
+      'templates.gru.title': 'GRU 文本分类',
+      'templates.gru.desc': '嵌入 + GRU + 层归一化 + 全连接，参数比 LSTM 更省。',
       'templates.autoencoder.title': '自编码器',
       'templates.autoencoder.desc': '784 → 64 → 16 → 64 → 784，学习压缩表示。',
       'common.cancel': '取消',
@@ -260,6 +274,12 @@ window.__ModuleLoader__.load({
       'err.deadEnd': '该层没有下游，不会被模型使用',
       'err.denseFlat': '全连接层需要 1D 输入，当前为 {shape}，请先添加 Flatten',
       'err.convRank': '卷积层需要 (C, H, W) 输入，当前为 {shape}',
+      'err.conv1dRank': '一维卷积需要 (长度, 通道) 输入，当前为 {shape}',
+      'err.globalPoolRank': '全局池化需要 (C, H, W) 输入，当前为 {shape}',
+      'err.layerNormRank': '层归一化只支持 1D 或 (长度, 特征) 输入，当前为 {shape}',
+      'err.groupNormRank': '组归一化需要 (C, H, W) 输入，当前为 {shape}',
+      'err.groupNormGroups': '通道数 {channels} 无法按 {groups} 组均分',
+      'err.recurrentRank': '循环层需要 (序列长度, 特征) 输入，当前为 {shape}',
       'err.poolRank': '池化层需要 (C, H, W) 输入，当前为 {shape}',
       'err.convGroups': '通道数 {channels} 无法按分组 {groups} 均分',
       'err.filtersGroups': '滤波器数 {filters} 无法按分组 {groups} 均分',
@@ -268,8 +288,9 @@ window.__ModuleLoader__.load({
       'err.dropoutRange': '丢弃率需要在 0 到 0.95 之间',
       'err.embeddingRank': '词嵌入需要 1D token 序列，当前为 {shape}',
       'err.lstmRank': 'LSTM 需要 (序列长度, 特征) 输入，当前为 {shape}',
-      'err.mergeInputs': 'Add / Concat 至少需要两个输入',
+      'err.mergeInputs': 'Add / Multiply / Concat 至少需要两个输入',
       'err.addMismatch': 'Add 的输入形状必须一致：{shapes}',
+      'err.multiplyMismatch': 'Multiply 的输入形状必须一致：{shapes}',
       'err.concatRank': 'Concat 的输入需要相同的秩：{shapes}',
       'err.concatDims': 'Concat 除拼接轴外的维度必须一致：{shapes}',
       'err.concatAxis': '通道拼接只支持 (C, H, W) 输入',
@@ -324,6 +345,14 @@ window.__ModuleLoader__.load({
       'node.lstm': 'LSTM',
       'node.add': 'Add',
       'node.concat': 'Concat',
+      'node.conv1d': 'Conv1D',
+      'node.globalavgpool2d': 'GlobalAvgPool2D',
+      'node.globalmaxpool2d': 'GlobalMaxPool2D',
+      'node.layernorm': 'LayerNorm',
+      'node.groupnorm': 'GroupNorm',
+      'node.gru': 'GRU',
+      'node.simplernn': 'SimpleRNN',
+      'node.multiply': 'Multiply',
       'node.disabled': 'Disabled',
       'node.disable': 'Disable layer',
       'node.enable': 'Enable layer',
@@ -340,6 +369,10 @@ window.__ModuleLoader__.load({
       'summary.bidirectional': 'bidirectional',
       'summary.residual': 'residual',
       'summary.skip': 'skip',
+      'summary.globalAvgPool': 'global avg',
+      'summary.globalMaxPool': 'global max',
+      'summary.layerNorm': 'normalize last dim',
+      'summary.groupNorm': '{groups} groups',
       'port.input': 'Input port',
       'port.output': 'Output port',
       'param.count': 'params',
@@ -474,6 +507,8 @@ window.__ModuleLoader__.load({
       'templates.resnet.desc': 'A conv block with a skip connection, Add merge, and batch norm.',
       'templates.lstm.title': 'LSTM text classifier',
       'templates.lstm.desc': 'Embedding + LSTM encoder + dense head for token sequences.',
+      'templates.gru.title': 'GRU text classifier',
+      'templates.gru.desc': 'Embedding + GRU + LayerNorm + dense head, cheaper than LSTM.',
       'templates.autoencoder.title': 'Autoencoder',
       'templates.autoencoder.desc': '784 → 64 → 16 → 64 → 784 to learn a compressed representation.',
       'common.cancel': 'Cancel',
@@ -519,6 +554,12 @@ window.__ModuleLoader__.load({
       'err.deadEnd': 'This layer has no downstream and will not be used',
       'err.denseFlat': 'Dense needs a 1D input, got {shape}; add Flatten first',
       'err.convRank': 'Conv2D needs a (C, H, W) input, got {shape}',
+      'err.conv1dRank': 'Conv1D needs a (length, channels) input, got {shape}',
+      'err.globalPoolRank': 'Global pooling needs a (C, H, W) input, got {shape}',
+      'err.layerNormRank': 'LayerNorm supports 1D or (length, features) inputs, got {shape}',
+      'err.groupNormRank': 'GroupNorm needs a (C, H, W) input, got {shape}',
+      'err.groupNormGroups': '{channels} channels cannot be split into {groups} groups',
+      'err.recurrentRank': 'Recurrent layers need a (sequence, features) input, got {shape}',
       'err.poolRank': 'Pooling needs a (C, H, W) input, got {shape}',
       'err.convGroups': '{channels} channels cannot be split into {groups} groups',
       'err.filtersGroups': '{filters} filters cannot be split into {groups} groups',
@@ -527,8 +568,9 @@ window.__ModuleLoader__.load({
       'err.dropoutRange': 'Drop rate must be between 0 and 0.95',
       'err.embeddingRank': 'Embedding needs a 1D token sequence, got {shape}',
       'err.lstmRank': 'LSTM needs a (sequence, features) input, got {shape}',
-      'err.mergeInputs': 'Add / Concat need at least two inputs',
+      'err.mergeInputs': 'Add / Multiply / Concat need at least two inputs',
       'err.addMismatch': 'Add inputs must share one shape: {shapes}',
+      'err.multiplyMismatch': 'Multiply inputs must share one shape: {shapes}',
       'err.concatRank': 'Concat inputs need the same rank: {shapes}',
       'err.concatDims': 'Concat inputs must match outside the concat axis: {shapes}',
       'err.concatAxis': 'Channel concat supports (C, H, W) inputs only',
@@ -621,25 +663,45 @@ window.__ModuleLoader__.load({
         color: '#0d9488',
         params: { filters: 32, kernel: 3, stride: 1, padding: 1, dilation: 1, groups: 1, activation: 'relu', bias: true },
       },
+      conv1d: {
+        cat: 'conv',
+        color: '#0d9488',
+        params: { filters: 32, kernel: 3, stride: 1, padding: 1, dilation: 1, groups: 1, activation: 'relu', bias: true },
+      },
       maxpool2d: { cat: 'conv', color: '#0d9488', params: { kernel: 2, stride: 2, padding: 0 } },
       avgpool2d: { cat: 'conv', color: '#0d9488', params: { kernel: 2, stride: 2, padding: 0 } },
+      globalavgpool2d: { cat: 'conv', color: '#0d9488', params: {} },
+      globalmaxpool2d: { cat: 'conv', color: '#0d9488', params: {} },
       flatten: { cat: 'conv', color: '#0d9488', params: {} },
+      layernorm: { cat: 'mlp', color: '#8b5cf6', params: {} },
+      groupnorm: { cat: 'mlp', color: '#8b5cf6', params: { groups: 8 } },
       embedding: { cat: 'seq', color: '#d97706', params: { vocab: 10000, dim: 128 } },
       lstm: {
         cat: 'seq',
         color: '#d97706',
         params: { hidden: 128, layers: 1, bidirectional: false, returnSequences: false, dropout: 0 },
       },
+      gru: {
+        cat: 'seq',
+        color: '#d97706',
+        params: { hidden: 128, layers: 1, bidirectional: false, returnSequences: false, dropout: 0 },
+      },
+      simplernn: {
+        cat: 'seq',
+        color: '#d97706',
+        params: { hidden: 128, layers: 1, bidirectional: false, returnSequences: false, dropout: 0 },
+      },
       add: { cat: 'merge', color: '#db2777', params: {} },
+      multiply: { cat: 'merge', color: '#db2777', params: {} },
       concat: { cat: 'merge', color: '#db2777', params: { axis: 'last' } },
     }
 
     const CATEGORIES = [
       { id: 'io', types: ['input', 'output'] },
-      { id: 'mlp', types: ['dense', 'dropout', 'batchnorm', 'activation'] },
-      { id: 'conv', types: ['conv2d', 'maxpool2d', 'avgpool2d', 'flatten'] },
-      { id: 'seq', types: ['embedding', 'lstm'] },
-      { id: 'merge', types: ['add', 'concat'] },
+      { id: 'mlp', types: ['dense', 'dropout', 'batchnorm', 'layernorm', 'groupnorm', 'activation'] },
+      { id: 'conv', types: ['conv2d', 'conv1d', 'maxpool2d', 'avgpool2d', 'globalavgpool2d', 'globalmaxpool2d', 'flatten'] },
+      { id: 'seq', types: ['embedding', 'lstm', 'gru', 'simplernn'] },
+      { id: 'merge', types: ['add', 'multiply', 'concat'] },
     ]
 
     const FIELDS = {
@@ -668,6 +730,18 @@ window.__ModuleLoader__.load({
         { key: 'stride', kind: 'int', min: 1, max: 16, step: 1, labelKey: 'field.stride' },
         { key: 'padding', kind: 'int', min: 0, max: 32, step: 1, labelKey: 'field.padding' },
       ],
+      conv1d: [
+        { key: 'filters', kind: 'int', min: 1, max: 100000, step: 1, labelKey: 'field.filters' },
+        { key: 'kernel', kind: 'int', min: 1, max: 31, step: 1, labelKey: 'field.kernel' },
+        { key: 'stride', kind: 'int', min: 1, max: 16, step: 1, labelKey: 'field.stride' },
+        { key: 'padding', kind: 'int', min: 0, max: 32, step: 1, labelKey: 'field.padding' },
+        { key: 'dilation', kind: 'int', min: 1, max: 8, step: 1, labelKey: 'field.dilation' },
+        { key: 'groups', kind: 'int', min: 1, max: 256, step: 1, labelKey: 'field.groups' },
+        { key: 'activation', kind: 'select', options: ACTIVATION_OPTIONS, labelKey: 'field.activation' },
+        { key: 'bias', kind: 'bool', labelKey: 'field.bias' },
+      ],
+      globalavgpool2d: [],
+      globalmaxpool2d: [],
       avgpool2d: [
         { key: 'kernel', kind: 'int', min: 1, max: 31, step: 1, labelKey: 'field.kernel' },
         { key: 'stride', kind: 'int', min: 1, max: 16, step: 1, labelKey: 'field.stride' },
@@ -676,6 +750,8 @@ window.__ModuleLoader__.load({
       flatten: [],
       dropout: [{ key: 'rate', kind: 'number', min: 0, max: 0.95, step: 0.05, labelKey: 'field.rate' }],
       batchnorm: [],
+      layernorm: [],
+      groupnorm: [{ key: 'groups', kind: 'int', min: 1, max: 256, step: 1, labelKey: 'field.groups' }],
       activation: [{ key: 'activation', kind: 'select', options: ACTIVATION_OPTIONS, labelKey: 'field.activation' }],
       embedding: [
         { key: 'vocab', kind: 'int', min: 1, max: 5000000, step: 1, labelKey: 'field.vocab' },
@@ -688,7 +764,22 @@ window.__ModuleLoader__.load({
         { key: 'returnSequences', kind: 'bool', labelKey: 'field.returnSequences' },
         { key: 'dropout', kind: 'number', min: 0, max: 0.9, step: 0.05, labelKey: 'field.rate' },
       ],
+      gru: [
+        { key: 'hidden', kind: 'int', min: 1, max: 8192, step: 1, labelKey: 'field.hidden' },
+        { key: 'layers', kind: 'int', min: 1, max: 8, step: 1, labelKey: 'field.layers' },
+        { key: 'bidirectional', kind: 'bool', labelKey: 'field.bidirectional' },
+        { key: 'returnSequences', kind: 'bool', labelKey: 'field.returnSequences' },
+        { key: 'dropout', kind: 'number', min: 0, max: 0.9, step: 0.05, labelKey: 'field.rate' },
+      ],
+      simplernn: [
+        { key: 'hidden', kind: 'int', min: 1, max: 8192, step: 1, labelKey: 'field.hidden' },
+        { key: 'layers', kind: 'int', min: 1, max: 8, step: 1, labelKey: 'field.layers' },
+        { key: 'bidirectional', kind: 'bool', labelKey: 'field.bidirectional' },
+        { key: 'returnSequences', kind: 'bool', labelKey: 'field.returnSequences' },
+        { key: 'dropout', kind: 'number', min: 0, max: 0.9, step: 0.05, labelKey: 'field.rate' },
+      ],
       add: [],
+      multiply: [],
       concat: [
         {
           key: 'axis',
@@ -1163,17 +1254,20 @@ window.__ModuleLoader__.load({
           if (!inEdges.length) fail('err.missingInput')
           else if (inEdges.length > 1) fail('err.tooManyInputs')
           else shape = firstShape
-        } else if (node.type === 'add' || node.type === 'concat') {
+        } else if (node.type === 'add' || node.type === 'multiply' || node.type === 'concat') {
           if (inEdges.length < 2) fail('err.mergeInputs')
           else if (inShapes.some((entry) => entry === null)) {
             /* an upstream error already explains the missing shape */
-          } else if (node.type === 'add') {
+          } else if (node.type === 'add' || node.type === 'multiply') {
             const first = inShapes[0]
             const same = inShapes.every(
               (entry) => entry.length === first.length && entry.every((dim, index) => dim === first[index]),
             )
-            if (!same) fail('err.addMismatch', { shapes: inShapes.map(formatShape).join(' / ') })
-            else shape = first.slice()
+            if (!same) {
+              fail(node.type === 'add' ? 'err.addMismatch' : 'err.multiplyMismatch', {
+                shapes: inShapes.map(formatShape).join(' / '),
+              })
+            } else shape = first.slice()
           } else {
             const axis = params.axis === 'channels' ? 'channels' : 'last'
             const first = inShapes[0]
@@ -1209,7 +1303,7 @@ window.__ModuleLoader__.load({
           else if (inEdges.length > 1) fail('err.tooManyInputs')
         }
 
-        if (!error && node.type !== 'input' && node.type !== 'output' && node.type !== 'add' && node.type !== 'concat') {
+        if (!error && node.type !== 'input' && node.type !== 'output' && node.type !== 'add' && node.type !== 'multiply' && node.type !== 'concat') {
           if (firstShape === null && inEdges.length) {
             /* the upstream layer failed; do not repeat its message */
           } else if (firstShape !== null) {
@@ -1246,6 +1340,33 @@ window.__ModuleLoader__.load({
                   parameterCount = filters * ((firstShape[0] / groups) * kernel * kernel) + (params.bias === false ? 0 : filters)
                 }
               }
+            } else if (node.type === 'conv1d') {
+              const filters = positiveInt(params.filters)
+              const kernel = positiveInt(params.kernel)
+              const stride = positiveInt(params.stride)
+              const padding = nonNegativeInt(params.padding)
+              const dilation = positiveInt(params.dilation)
+              const groups = positiveInt(params.groups)
+              if (filters === null) badField('field.filters')
+              else if (kernel === null) badField('field.kernel')
+              else if (stride === null) badField('field.stride')
+              else if (padding === null) badField('field.padding')
+              else if (dilation === null) badField('field.dilation')
+              else if (groups === null) badField('field.groups')
+              else if (firstShape.length !== 2) fail('err.conv1dRank', { shape: formatShape(firstShape) })
+              else if (firstShape[1] % groups !== 0) fail('err.convGroups', { channels: firstShape[1], groups })
+              else if (filters % groups !== 0) fail('err.filtersGroups', { filters, groups })
+              else {
+                const length = windowOut(firstShape[0], kernel, stride, padding, dilation)
+                if (length <= 0) fail('err.spatial')
+                else {
+                  shape = [length, filters]
+                  parameterCount = filters * ((firstShape[1] / groups) * kernel) + (params.bias === false ? 0 : filters)
+                }
+              }
+            } else if (node.type === 'globalavgpool2d' || node.type === 'globalmaxpool2d') {
+              if (firstShape.length !== 3) fail('err.globalPoolRank', { shape: formatShape(firstShape) })
+              else shape = [firstShape[0], 1, 1]
             } else if (node.type === 'maxpool2d' || node.type === 'avgpool2d') {
               const kernel = positiveInt(params.kernel)
               const stride = positiveInt(params.stride)
@@ -1275,6 +1396,21 @@ window.__ModuleLoader__.load({
                 shape = firstShape.slice()
                 parameterCount = 2 * firstShape[0]
               }
+            } else if (node.type === 'layernorm') {
+              if (firstShape.length !== 1 && firstShape.length !== 2) fail('err.layerNormRank', { shape: formatShape(firstShape) })
+              else {
+                shape = firstShape.slice()
+                parameterCount = 2 * firstShape[firstShape.length - 1]
+              }
+            } else if (node.type === 'groupnorm') {
+              const groups = positiveInt(params.groups)
+              if (groups === null) badField('field.groups')
+              else if (firstShape.length !== 3) fail('err.groupNormRank', { shape: formatShape(firstShape) })
+              else if (firstShape[0] % groups !== 0) fail('err.groupNormGroups', { channels: firstShape[0], groups })
+              else {
+                shape = firstShape.slice()
+                parameterCount = 2 * firstShape[0]
+              }
             } else if (node.type === 'activation') {
               shape = firstShape.slice()
             } else if (node.type === 'embedding') {
@@ -1287,20 +1423,21 @@ window.__ModuleLoader__.load({
                 shape = [firstShape[0], dim]
                 parameterCount = vocab * dim
               }
-            } else if (node.type === 'lstm') {
+            } else if (node.type === 'lstm' || node.type === 'gru' || node.type === 'simplernn') {
               const hidden = positiveInt(params.hidden)
               const layers = positiveInt(params.layers)
               const dropout = rateValue(params.dropout, 0.9)
               if (hidden === null) badField('field.hidden')
               else if (layers === null) badField('field.layers')
               else if (dropout === null) fail('err.dropoutRange')
-              else if (firstShape.length !== 2) fail('err.lstmRank', { shape: formatShape(firstShape) })
+              else if (firstShape.length !== 2) fail('err.recurrentRank', { shape: formatShape(firstShape) })
               else {
                 const directions = params.bidirectional ? 2 : 1
+                const gates = node.type === 'lstm' ? 4 : node.type === 'gru' ? 3 : 1
                 shape = params.returnSequences ? [firstShape[0], hidden * directions] : [hidden * directions]
                 let inputSize = firstShape[1]
                 for (let layer = 0; layer < layers; layer += 1) {
-                  parameterCount += 4 * hidden * (inputSize + hidden) * directions + 8 * hidden * directions
+                  parameterCount += gates * hidden * (inputSize + hidden) * directions + 2 * gates * hidden * directions
                   inputSize = hidden * directions
                 }
               }
@@ -1603,6 +1740,37 @@ window.__ModuleLoader__.load({
             vars.set(id, base)
             break
           }
+          case 'conv1d': {
+            const inChannels = firstInputShape(analysis, node)[1]
+            const params = node.params
+            init.push(
+              'self.' + base + ' = nn.Conv1d(' +
+                inChannels + ', ' + params.filters +
+                ', kernel_size=' + params.kernel +
+                ', stride=' + params.stride +
+                ', padding=' + params.padding +
+                ', dilation=' + params.dilation +
+                ', groups=' + params.groups +
+                (params.bias === false ? ', bias=False' : '') +
+                ')',
+            )
+            body.push(base + ' = self.' + base + '(' + source + '.transpose(1, 2)).transpose(1, 2)')
+            const act = pytorchActivation(params.activation)
+            if (act) {
+              init.push('self.' + base + '_act = ' + act)
+              body.push(base + ' = self.' + base + '_act(' + base + ')')
+            }
+            vars.set(id, base)
+            break
+          }
+          case 'globalavgpool2d':
+          case 'globalmaxpool2d': {
+            const kind = node.type === 'globalavgpool2d' ? 'AdaptiveAvgPool2d' : 'AdaptiveMaxPool2d'
+            init.push('self.' + base + ' = nn.' + kind + '(1)')
+            body.push(base + ' = self.' + base + '(' + source + ')')
+            vars.set(id, base)
+            break
+          }
           case 'maxpool2d':
           case 'avgpool2d': {
             const kind = node.type === 'maxpool2d' ? 'MaxPool2d' : 'AvgPool2d'
@@ -1633,6 +1801,20 @@ window.__ModuleLoader__.load({
             vars.set(id, base)
             break
           }
+          case 'layernorm': {
+            const inShape = firstInputShape(analysis, node)
+            init.push('self.' + base + ' = nn.LayerNorm(' + inShape[inShape.length - 1] + ')')
+            body.push(base + ' = self.' + base + '(' + source + ')')
+            vars.set(id, base)
+            break
+          }
+          case 'groupnorm': {
+            const channels = firstInputShape(analysis, node)[0]
+            init.push('self.' + base + ' = nn.GroupNorm(' + node.params.groups + ', ' + channels + ')')
+            body.push(base + ' = self.' + base + '(' + source + ')')
+            vars.set(id, base)
+            break
+          }
           case 'activation': {
             const act = pytorchActivation(node.params.activation)
             if (act) {
@@ -1649,13 +1831,17 @@ window.__ModuleLoader__.load({
             body.push(base + ' = self.' + base + '(' + source + ')')
             vars.set(id, base)
             break
-          case 'lstm': {
+          case 'lstm':
+          case 'gru':
+          case 'simplernn': {
             const inFeatures = firstInputShape(analysis, node)[1]
             const params = node.params
+            const kind = node.type === 'lstm' ? 'LSTM' : node.type === 'gru' ? 'GRU' : 'RNN'
+            const packed = node.type === 'lstm'
             const extras = []
             if (params.layers > 1) extras.push('dropout=' + params.dropout)
             init.push(
-              'self.' + base + ' = nn.LSTM(' +
+              'self.' + base + ' = nn.' + kind + '(' +
                 inFeatures + ', ' + params.hidden +
                 ', num_layers=' + params.layers +
                 ', batch_first=True' +
@@ -1668,7 +1854,11 @@ window.__ModuleLoader__.load({
             } else {
               const seqVar = freshLocal(base + '_out')
               const hiddenVar = freshLocal(base + '_hidden')
-              body.push(seqVar + ', (' + hiddenVar + ', _) = self.' + base + '(' + source + ')')
+              body.push(
+                packed
+                  ? seqVar + ', (' + hiddenVar + ', _) = self.' + base + '(' + source + ')'
+                  : seqVar + ', ' + hiddenVar + ' = self.' + base + '(' + source + ')',
+              )
               if (params.bidirectional) {
                 body.push(base + ' = torch.cat((' + hiddenVar + '[-2], ' + hiddenVar + '[-1]), dim=1)')
               } else {
@@ -1679,9 +1869,10 @@ window.__ModuleLoader__.load({
             vars.set(id, base)
             break
           }
-          case 'add': {
+          case 'add':
+          case 'multiply': {
             if (inputsVars.length < 2) return null
-            body.push(base + ' = ' + inputsVars.join(' + '))
+            body.push(base + ' = ' + inputsVars.join(node.type === 'add' ? ' + ' : ' * '))
             vars.set(id, base)
             break
           }
@@ -1825,6 +2016,35 @@ window.__ModuleLoader__.load({
             vars.set(id, base)
             break
           }
+          case 'conv1d': {
+            if (node.params.padding > 0) {
+              lines.push(
+                '    ' + base + '_pad = layers.ZeroPadding1D(padding=' + node.params.padding +
+                  ', name="' + base + '_pad")(' + source + ')',
+              )
+            }
+            const convSource = node.params.padding > 0 ? base + '_pad' : source
+            lines.push(
+              '    ' + base + ' = layers.Conv1D(' + node.params.filters +
+                ', kernel_size=' + node.params.kernel +
+                ', strides=' + node.params.stride +
+                ', padding="valid", dilation_rate=' + node.params.dilation +
+                ', groups=' + node.params.groups +
+                (node.params.bias === false ? ', use_bias=False' : '') +
+                ', name="' + base + '")(' + convSource + ')',
+            )
+            const convAct = activationName(node.params.activation)
+            if (convAct) lines.push('    ' + base + ' = layers.Activation("' + convAct + '", name="' + base + '_act")(' + base + ')')
+            vars.set(id, base)
+            break
+          }
+          case 'globalavgpool2d':
+          case 'globalmaxpool2d': {
+            const kind = node.type === 'globalavgpool2d' ? 'GlobalAveragePooling2D' : 'GlobalMaxPooling2D'
+            lines.push('    ' + base + ' = layers.' + kind + '(keepdims=True, name="' + base + '")(' + source + ')')
+            vars.set(id, base)
+            break
+          }
           case 'maxpool2d':
           case 'avgpool2d': {
             if (node.params.padding > 0) {
@@ -1867,6 +2087,17 @@ window.__ModuleLoader__.load({
             vars.set(id, base)
             break
           }
+          case 'layernorm':
+            lines.push('    ' + base + ' = layers.LayerNormalization(axis=-1, name="' + base + '")(' + source + ')')
+            vars.set(id, base)
+            break
+          case 'groupnorm':
+            lines.push(
+              '    ' + base + ' = layers.GroupNormalization(groups=' + node.params.groups +
+                ', axis=-1, name="' + base + '")(' + source + ')',
+            )
+            vars.set(id, base)
+            break
           case 'activation': {
             const act = activationName(node.params.activation)
             lines.push('    ' + base + ' = layers.Activation("' + (act || 'linear') + '", name="' + base + '")(' + source + ')')
@@ -1880,16 +2111,19 @@ window.__ModuleLoader__.load({
             )
             vars.set(id, base)
             break
-          case 'lstm': {
+          case 'lstm':
+          case 'gru':
+          case 'simplernn': {
+            const layerKind = node.type === 'lstm' ? 'LSTM' : node.type === 'gru' ? 'GRU' : 'SimpleRNN'
             let current = source
             for (let layer = 0; layer < node.params.layers; layer += 1) {
               const last = layer === node.params.layers - 1
               const returnSequences = last ? node.params.returnSequences : true
               const layerName = base + (node.params.layers > 1 ? '_' + (layer + 1) : '')
-              const inner = 'layers.LSTM(' + node.params.hidden +
+              const inner = 'layers.' + layerKind + '(' + node.params.hidden +
                 ', return_sequences=' + (returnSequences ? 'True' : 'False') +
                 (last && node.params.dropout > 0 ? ', dropout=' + node.params.dropout : '') +
-                ', name="' + layerName + '_lstm")'
+                ', name="' + layerName + '_' + layerKind.toLowerCase() + '")'
               const wrapped = node.params.bidirectional
                 ? 'layers.Bidirectional(' + inner + ', name="' + layerName + '")'
                 : inner
@@ -1900,9 +2134,12 @@ window.__ModuleLoader__.load({
             break
           }
           case 'add':
-            lines.push('    ' + base + ' = layers.Add(name="' + base + '")(' + '[' + inputVarsOfNode.join(', ') + '])')
+          case 'multiply': {
+            const kind = node.type === 'add' ? 'Add' : 'Multiply'
+            lines.push('    ' + base + ' = layers.' + kind + '(name="' + base + '")(' + '[' + inputVarsOfNode.join(', ') + '])')
             vars.set(id, base)
             break
+          }
           case 'concat': {
             const inShape = firstInputShape(analysis, node)
             let axis = '-1'
@@ -2432,6 +2669,20 @@ window.__ModuleLoader__.load({
             ]),
         },
         {
+          id: 'gru',
+          titleKey: 'templates.gru.title',
+          descKey: 'templates.gru.desc',
+          build: () =>
+            buildTemplate(t('templates.gru.title'), [
+              { type: 'input', title: t('node.input') + ' tokens', params: { name: 'tokens', shape: '32' }, ...row(0) },
+              { type: 'embedding', title: t('node.embedding') + ' 128', params: { vocab: 10000, dim: 128 }, from: [0], ...row(1) },
+              { type: 'gru', title: t('node.gru') + ' 128', params: { hidden: 128, layers: 1, returnSequences: false }, from: [1], ...row(2) },
+              { type: 'layernorm', title: t('node.layernorm'), from: [2], ...row(3) },
+              { type: 'dense', title: t('node.dense') + ' 10', params: { units: 10, activation: 'linear' }, from: [3], ...row(4) },
+              { type: 'output', title: t('node.output'), params: { name: 'logits' }, from: [4], ...row(5) },
+            ]),
+        },
+        {
           id: 'autoencoder',
           titleKey: 'templates.autoencoder.title',
           descKey: 'templates.autoencoder.desc',
@@ -2563,7 +2814,7 @@ window.__ModuleLoader__.load({
       if (graph.edges.some((edge) => edge.from === from && edge.to === to)) return { graph, reason: 'toast.duplicateEdge' }
       const target = graph.nodes.find((node) => node.id === to)
       if (!target) return { graph, reason: null }
-      if (target.type !== 'add' && target.type !== 'concat' && graph.edges.some((edge) => edge.to === to)) {
+      if (target.type !== 'add' && target.type !== 'multiply' && target.type !== 'concat' && graph.edges.some((edge) => edge.to === to)) {
         return { graph, reason: 'toast.inputBusy' }
       }
       if (wouldCycle(graph, from, to)) return { graph, reason: 'toast.cycle' }
@@ -3002,8 +3253,70 @@ window.__ModuleLoader__.load({
             h('path', { d: 'M9 7h6v10H9z' }),
             h('path', { d: 'M12 7V4m0 13v3M7 4h10M7 20h10', opacity: 0.55 }),
           )
+        case 'conv1d':
+          return h(
+            'svg',
+            common,
+            h('path', { d: 'M3 8h18M3 12h18M3 16h18', opacity: 0.3 }),
+            h('rect', { x: 6, y: 6, width: 4, height: 12, rx: 1 }),
+            h('rect', { x: 14, y: 6, width: 4, height: 12, rx: 1 }),
+          )
+        case 'globalavgpool2d':
+          return h(
+            'svg',
+            common,
+            h('rect', { x: 3, y: 4, width: 18, height: 16, rx: 2 }),
+            h('path', { d: 'M9 4v16M15 4v16M3 10h18M3 16h18', opacity: 0.35 }),
+            h('path', { d: 'M12 9v5m-2-2 2 2 2-2' }),
+          )
+        case 'globalmaxpool2d':
+          return h(
+            'svg',
+            common,
+            h('rect', { x: 3, y: 4, width: 18, height: 16, rx: 2 }),
+            h('path', { d: 'M9 4v16M15 4v16M3 10h18M3 16h18', opacity: 0.35 }),
+            h('path', { d: 'M12 8l1.1 2.3 2.5.3-1.8 1.8.4 2.5-2.2-1.2-2.2 1.2.4-2.5-1.8-1.8 2.5-.3z' }),
+          )
+        case 'layernorm':
+          return h(
+            'svg',
+            common,
+            h('path', { d: 'M4 7h16M4 17h16', opacity: 0.45 }),
+            h('path', { d: 'M12 4v16' }),
+            h('path', { d: 'M8 9l-3 3 3 3M16 9l3 3-3 3' }),
+          )
+        case 'groupnorm':
+          return h(
+            'svg',
+            common,
+            h('circle', { cx: 6, cy: 9, r: 1.7 }),
+            h('circle', { cx: 6, cy: 16, r: 1.7 }),
+            h('circle', { cx: 12, cy: 9, r: 1.7 }),
+            h('circle', { cx: 12, cy: 16, r: 1.7 }),
+            h('circle', { cx: 18, cy: 9, r: 1.7 }),
+            h('circle', { cx: 18, cy: 16, r: 1.7 }),
+            h('path', { d: 'M9 4v16M15 4v16', strokeDasharray: '2 2', opacity: 0.45 }),
+          )
+        case 'gru':
+          return h(
+            'svg',
+            common,
+            h('rect', { x: 5, y: 7, width: 14, height: 10, rx: 3 }),
+            h('path', { d: 'M5 5h9a4 4 0 0 1 0 8H8' }),
+            h('path', { d: 'M8 10l-3 3 3 3' }),
+          )
+        case 'simplernn':
+          return h(
+            'svg',
+            common,
+            h('rect', { x: 5, y: 7, width: 14, height: 10, rx: 3 }),
+            h('circle', { cx: 12, cy: 12, r: 3 }),
+            h('path', { d: 'M3 12h2M19 12h2' }),
+          )
         case 'add':
           return h('svg', common, h('circle', { cx: 12, cy: 12, r: 8 }), h('path', { d: 'M12 8v8M8 12h8' }))
+        case 'multiply':
+          return h('svg', common, h('circle', { cx: 12, cy: 12, r: 8 }), h('path', { d: 'M9 9l6 6M15 9l-6 6' }))
         case 'concat':
           return h('svg', common, h('path', { d: 'M3 7h7l3 5 3-5h5M3 17h7l3-5 3 5h5' }))
         default:
@@ -3326,6 +3639,12 @@ window.__ModuleLoader__.load({
           return p.units + ' ' + t('unit.units') + ' · ' + t('act.' + (p.activation || 'linear'))
         case 'conv2d':
           return p.filters + ' ' + t('unit.filters') + ' · ' + p.kernel + '×' + p.kernel + ' · s' + p.stride
+        case 'conv1d':
+          return p.filters + ' ' + t('unit.filters') + ' · k' + p.kernel + ' · s' + p.stride
+        case 'globalavgpool2d':
+          return t('summary.globalAvgPool')
+        case 'globalmaxpool2d':
+          return t('summary.globalMaxPool')
         case 'maxpool2d':
         case 'avgpool2d':
           return p.kernel + '×' + p.kernel + ' · s' + p.stride
@@ -3335,6 +3654,10 @@ window.__ModuleLoader__.load({
           return 'p = ' + p.rate
         case 'batchnorm':
           return t('summary.batchnorm')
+        case 'layernorm':
+          return t('summary.layerNorm')
+        case 'groupnorm':
+          return t('summary.groupNorm', { groups: p.groups })
         case 'activation':
           return t('act.' + p.activation)
         case 'embedding':
@@ -3344,7 +3667,18 @@ window.__ModuleLoader__.load({
             p.hidden + ' ' + t('unit.hidden') + ' · ' + p.layers + ' × LSTM' +
             (p.bidirectional ? ' · ' + t('summary.bidirectional') : '')
           )
+        case 'gru':
+          return (
+            p.hidden + ' ' + t('unit.hidden') + ' · ' + p.layers + ' × GRU' +
+            (p.bidirectional ? ' · ' + t('summary.bidirectional') : '')
+          )
+        case 'simplernn':
+          return (
+            p.hidden + ' ' + t('unit.hidden') + ' · ' + p.layers + ' × RNN' +
+            (p.bidirectional ? ' · ' + t('summary.bidirectional') : '')
+          )
         case 'add':
+        case 'multiply':
           return inputCount + ' → 1'
         case 'concat':
           return inputCount + ' → 1 · ' + t('axis.' + p.axis)

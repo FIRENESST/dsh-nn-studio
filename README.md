@@ -6,14 +6,14 @@ A visual neural-network workbench that lives in the DeepSeek Harness sidebar. Dr
 
 ## Features
 
-- **Visual graph editor** — 14 layer types, draggable cards, port-to-port connections, pan/zoom, multi-input `Add` / `Concat` merges, undo/redo, and keyboard shortcuts.
+- **Visual graph editor** — 22 layer types, draggable cards, port-to-port connections, pan/zoom, multi-input `Add` / `Multiply` / `Concat` merges, undo/redo, and keyboard shortcuts.
 - **Marquee selection** — hold `Ctrl` (or `Cmd`) and drag on empty canvas to box-select layers; `Backspace` or `Delete` removes the whole selection.
 - **Layer bypass** — the power button on a layer (or the Node tab) temporarily disables it. Checks and code export skip the layer and pass its input shape through, with a visible disabled state.
 - **Live shape inference** — every layer resolves its output shape and parameter count as you edit. The checker reports rank mismatches, invalid convolution/pooling sizes, channel/group divisibility, merge mismatches, cycles, missing inputs, and missing output layers.
 - **Model summary** — layer count, total parameters, model size, input/output shapes, and a per-layer table.
 - **Inspector** — per-layer parameters, validation issues that jump to the offending node, training configuration, and generated source.
 - **Code export** — PyTorch and Keras model code, training script, and requirements. Loss handling covers logits, softmax tails, and reconstruction (autoencoder) graphs; Keras output uses channels-last so it runs on CPU.
-- **Templates** — MLP, CNN, residual block, LSTM text classifier, autoencoder, and a blank canvas.
+- **Templates** — MLP, CNN, residual block, LSTM text classifier, GRU text classifier, autoencoder, and a blank canvas.
 - **Persistence** — automatic local save, JSON import/export, and copy/download for generated code.
 - **Chinese-first UI** — Chinese by default, with an in-app `中/EN` switch in the toolbar; both locales use the host theme tokens.
 
@@ -22,10 +22,10 @@ A visual neural-network workbench that lives in the DeepSeek Harness sidebar. Dr
 | Category | Layers |
 | --- | --- |
 | I/O | Input, Output |
-| Dense | Dense, Dropout, BatchNorm, Activation |
-| Convolution | Conv2D, MaxPool2D, AvgPool2D, Flatten |
-| Sequence | Embedding, LSTM |
-| Merge | Add, Concat |
+| Dense | Dense, Dropout, BatchNorm, LayerNorm, GroupNorm, Activation |
+| Convolution | Conv2D, Conv1D, MaxPool2D, AvgPool2D, GlobalAvgPool2D, GlobalMaxPool2D, Flatten |
+| Sequence | Embedding, LSTM, GRU, SimpleRNN |
+| Merge | Add, Multiply, Concat |
 
 ## Install
 
@@ -83,13 +83,13 @@ Pixel-level browser verification is environment-dependent; open the panel and ch
 
 主要功能：
 
-- 14 种层与节点图编辑：拖动、连线、平移缩放、撤销重做；
+- 22 种层与节点图编辑：拖动、连线、平移缩放、撤销重做；
 - 框选与批量删除：按住 `Ctrl`（或 `Cmd`）在空白处拖动框选多个层，按 `Backspace` 或 `Delete` 删除所选；
 - 临时禁用层：节点上的电源按钮或「属性」面板可禁用某一层，检查与代码导出会跳过它，并把输入形状透传给下游；
 - 实时形状推导与检查：卷积/池化尺寸、分组整除、合并层形状、循环连接、缺少输入/输出；
 - 模型面板：层数、参数量、模型大小、逐层明细、训练配置；
 - 代码面板：PyTorch / Keras 模型、训练脚本、依赖清单，可复制或下载；
-- 模板：MLP、CNN、残差网络、LSTM 文本分类、自编码器；
+- 模板：MLP、CNN、残差网络、LSTM 文本分类、GRU 文本分类、自编码器；
 - 自动保存、JSON 导入导出、默认中文界面（工具栏可切换 `中/EN`）、跟随宿主主题。
 
 安装：把本仓库复制到 Harness 可访问的工作区，让 Agent 通过 Plugin Manager 安装该 bundle。侧边栏出现「神经网络工作室」图标后点击即可使用。
