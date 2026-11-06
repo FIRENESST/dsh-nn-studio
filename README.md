@@ -9,6 +9,7 @@ A visual neural-network workbench that lives in the DeepSeek Harness sidebar. Dr
 - **Visual graph editor** — 22 layer types, draggable cards, port-to-port connections, pan/zoom, multi-input `Add` / `Multiply` / `Concat` merges, undo/redo, and keyboard shortcuts.
 - **Marquee selection** — hold `Ctrl` (or `Cmd`) and drag on empty canvas to box-select layers; `Backspace` or `Delete` removes the whole selection.
 - **Layer bypass** — the power button on a layer (or the Node tab) temporarily disables it. Checks and code export skip the layer and pass its input shape through, with a visible disabled state.
+- **Multiple output heads** — add several Output layers. Model export returns every head; the training export becomes a per-head scaffold where you define one target and loss per output.
 - **Live shape inference** — every layer resolves its output shape and parameter count as you edit. The checker reports rank mismatches, invalid convolution/pooling sizes, channel/group divisibility, merge mismatches, cycles, missing inputs, and missing output layers.
 - **Model summary** — layer count, total parameters, model size, input/output shapes, and a per-layer table.
 - **Inspector** — per-layer parameters, validation issues that jump to the offending node, training configuration, and generated source.
@@ -86,6 +87,7 @@ Pixel-level browser verification is environment-dependent; open the panel and ch
 - 22 种层与节点图编辑：拖动、连线、平移缩放、撤销重做；
 - 框选与批量删除：按住 `Ctrl`（或 `Cmd`）在空白处拖动框选多个层，按 `Backspace` 或 `Delete` 删除所选；
 - 临时禁用层：节点上的电源按钮或「属性」面板可禁用某一层，检查与代码导出会跳过它，并把输入形状透传给下游；
+- 多输出模型：可以添加多个输出层，模型代码会返回所有 head；训练脚本导出为 scaffold，需要为每个输出分别定义目标和损失；
 - 实时形状推导与检查：卷积/池化尺寸、分组整除、合并层形状、循环连接、缺少输入/输出；
 - 模型面板：层数、参数量、模型大小、逐层明细、训练配置；
 - 代码面板：PyTorch / Keras 模型、训练脚本、依赖清单，可复制或下载；
